@@ -72,7 +72,7 @@ export default function ReviewContractTab() {
       console.error('Error analyzing contract:', err)
       setError(err.message || 'Failed to analyze contract')
     } finally {
-      setIsAnalyzing(false)
+    setIsAnalyzing(false)
       setAnalysisStage("")
     }
   }
@@ -157,7 +157,7 @@ export default function ReviewContractTab() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+            </div>
 
       {/* File Upload */}
       <Card>
@@ -205,7 +205,7 @@ export default function ReviewContractTab() {
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                 <span className="text-sm font-medium">{analysisStage}</span>
-              </div>
+          </div>
               <Progress value={75} className="w-full" />
               <p className="text-xs text-muted-foreground">
                 Eric Sacks' due diligence process is now automated...
@@ -290,15 +290,15 @@ export default function ReviewContractTab() {
                           <div className="mt-3 p-3 bg-muted rounded-md">
                             <p className="text-sm font-medium text-foreground mb-1">Recommendation:</p>
                             <p className="text-sm text-muted-foreground">{concern.recommendation}</p>
-                          </div>
+          </div>
                           <div className="mt-2 p-2 bg-muted/50 rounded text-xs">
                             <span className="font-medium">Context:</span> {concern.context}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            </div>
+          </div>
+        </div>
+      </div>
                   ))}
-                </div>
+            </div>
               </CardContent>
             </Card>
           )}

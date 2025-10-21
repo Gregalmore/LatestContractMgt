@@ -151,8 +151,8 @@ export default function DraftContractTab() {
       console.error('Error generating contract:', err)
       setError(err.message || 'Failed to generate contract')
     } finally {
-      setIsLoading(false)
-      setLoadingStage("")
+    setIsLoading(false)
+    setLoadingStage("")
     }
   }
 
