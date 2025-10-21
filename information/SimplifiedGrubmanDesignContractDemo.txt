@@ -1,0 +1,1947 @@
+Grubman Contract Assistant - Design Document
+Version: 1.0 (Phase 1 - 4-Day Demo)
+Date: October 14, 2025
+Status: Ready for Implementation
+Approved By: [Pending]
+Document Purpose
+This design document translates the approved requirements into a concrete technical implementation plan. It provides:
+* Detailed architecture with component specifications
+* Database schemas and data models
+* API integration specifications
+* UI/UX wireframes and flows
+* Step-by-step GitHub resource utilization
+* Code structure and organization
+* Testing strategy
+Design Philosophy for Phase 1:
+* Simplicity over sophistication - Straightforward code that works
+* GPT-4 does the heavy lifting (or other LLM) - Let AI handle complexity instead of algorithms
+* No vector databases - Simple file/JSON storage
+* No workflow engines - Direct Python functions (prepares for Phase 2 agentic transition)
+* Streamlit for speed - Rapid UI development
+* Easy to understand - Any developer can pick this up
+Phase 2 Readiness:
+* Architecture supports easy migration to agentic AI (CrewAI, LangGraph, etc.)
+* Functions are modular and can become agents
+* Data structures support vector database migration
+* Make.com can be added as orchestration layer if needed
+1. System Architecture
+1.1 High-Level Architecture
++-----------------------------------------------------------------+
+¦                    PRESENTATION LAYER                           ¦
+¦                   (Streamlit Web App)                           ¦
+¦                                                                 ¦
+¦  +----------------------+  +------------------------------+   ¦
+¦  ¦  Tab 1: Draft        ¦  ¦  Tab 2: Review               ¦   ¦
+¦  ¦  Contract            ¦  ¦  Contract                    ¦   ¦
+¦  ¦                      ¦  ¦                              ¦   ¦
+¦  ¦  • Template Select   ¦  ¦  • Upload PDF/DOCX          ¦   ¦
+¦  ¦  • Client Info Form  ¦  ¦  • Run Analysis             ¦   ¦
+¦  ¦  • Generate Button   ¦  ¦  • View Report              ¦   ¦
+¦  ¦  • Edit Draft        ¦  ¦  • Download Results         ¦   ¦
+¦  ¦  • Download          ¦  ¦                              ¦   ¦
+¦  +----------------------+  +------------------------------+   ¦
++-----------------------------------------------------------------+
+                              ?
++-----------------------------------------------------------------+
+¦                    APPLICATION LAYER                            ¦
+¦                   (Business Logic - Python)                     ¦
+¦                                                                 ¦
+¦  +--------------------------------------------------------+   ¦
+¦  ¦  ContractDrafter                                       ¦   ¦
+¦  ¦  • search_firm_history()                               ¦   ¦
+¦  ¦  • generate_draft()                                    ¦   ¦
+¦  ¦  • merge_template_with_history()                       ¦   ¦
+¦  +--------------------------------------------------------+   ¦
+¦                                                                 ¦
+¦  +--------------------------------------------------------+   ¦
+¦  ¦  ContractReviewer                                      ¦   ¦
+¦  ¦  • extract_text()                                      ¦   ¦
+¦  ¦  • analyze_against_checklist()                         ¦   ¦
+¦  ¦  • flag_critical_issues()                              ¦   ¦
+¦  ¦  • generate_report()                                   ¦   ¦
+¦  +--------------------------------------------------------+   ¦
+¦                                                                 ¦
+¦  +--------------------------------------------------------+   ¦
+¦  ¦  GPT4Client or other LLM  (Wrapper)                                  ¦   ¦
+¦  ¦  • draft_contract()                                    ¦   ¦
+¦  ¦  • analyze_clause()                                    ¦   ¦
+¦  ¦  • categorize_section()                                ¦   ¦
+¦  +--------------------------------------------------------+   ¦
++-----------------------------------------------------------------+
+                              ?
++-----------------------------------------------------------------+
+¦                      DATA LAYER                                 ¦
+¦                   (Files & JSON)                                ¦
+¦                                                                 ¦
+¦  data/                                                          ¦
+¦  +-- templates/                                                 ¦
+¦  ¦   +-- mutual_nda.txt                                        ¦
+¦  ¦   +-- oneway_nda.txt                                        ¦
+¦  ¦   +-- service_agreement.txt                                 ¦
+¦  ¦                                                              ¦
+¦  +-- firm_history/                                              ¦
+¦  ¦   +-- contracts/                                             ¦
+¦  ¦   ¦   +-- drake_nda_2024.txt                               ¦
+¦  ¦   ¦   +-- beyonce_nda_2023.txt                             ¦
+¦  ¦   ¦   +-- ... (8 more contracts)                            ¦
+¦  ¦   +-- index.json (metadata: client, industry, date)         ¦
+¦  ¦                                                              ¦
+¦  +-- clients/                                                   ¦
+¦  ¦   +-- clients.json (name, industry, history)                ¦
+¦  ¦                                                              ¦
+¦  +-- config/                                                    ¦
+¦      +-- due_diligence_checklist.json                          ¦
+¦      +-- risk_patterns.json                                    ¦
++-----------------------------------------------------------------+
+                              ?
++-----------------------------------------------------------------+
+¦                    EXTERNAL SERVICES                            ¦
+¦                                                                 ¦
+¦  +------------------------------------------+                 ¦
+¦  ¦  OpenAI API (GPT-4)                      ¦                 ¦
+¦  ¦  • Contract generation                   ¦                 ¦
+¦  ¦  • Contract analysis                     ¦                 ¦
+¦  ¦  • Clause extraction                     ¦                 ¦
+¦  +------------------------------------------+                 ¦
++-----------------------------------------------------------------+
+1.2 Component Responsibilities
+Presentation Layer (Streamlit):
+* User input collection
+* Display results
+* File uploads/downloads
+* Progress indicators
+* Error messages
+Application Layer (Python Classes):
+* Business logic execution
+* Orchestration of operations
+* Data validation
+* Error handling
+* Note: Functions designed to easily become agents in Phase 2
+Data Layer (JSON/Files):
+* Template storage
+* Firm history storage
+* Client database
+* Configuration files
+* Note: Structure supports migration to vector DB in Phase 2
+External Services:
+* OpenAI GPT-4 API calls (or other LLM)
+* Note: Wrapped in abstraction layer for easy replacement
+1.3 Why This Architecture (Not Using Make.com or Agents Yet)
+Phase 1 Decision: Direct Python Functions
+* ? Faster to build (no workflow engine learning curve)
+* ? Easier to debug (straightforward code flow)
+* ? Complete control (no black boxes)
+* ? Lower cost (no additional subscriptions)
+* ? Prepares for Phase 2 (functions ? agents is easy)
+Phase 2 Migration Path:
+# Phase 1: Direct function call
+result = contract_drafter.generate_draft(client, template)
+
+# Phase 2: Same function becomes an agent
+drafter_agent = Agent(
+    role="Contract Drafter",
+    goal="Generate contracts from firm history",
+    function=contract_drafter.generate_draft
+)
+result = drafter_agent.execute(client, template)
+
+# Or with Make.com as orchestrator:
+# Trigger workflow ? Call Python functions via webhook ? Return results
+
+2. Data Models & Schemas
+2.1 Contract Template Structure
+File: data/templates/mutual_nda.txt
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+This Agreement is entered into as of {{DATE}} between {{PARTY_1}} and {{PARTY_2}}.
+
+1. PURPOSE
+{{PURPOSE}}
+
+2. CONFIDENTIAL INFORMATION
+"Confidential Information" means {{CONFIDENTIALITY_DEFINITION}}
+
+3. OBLIGATIONS
+Each party agrees to:
+(a) Keep confidential information secret
+(b) Use it only for {{PURPOSE}}
+(c) Not disclose to third parties without consent
+
+4. EXCLUSIONS
+Confidential Information does not include information that:
+(a) Is publicly available
+(b) Was known prior to disclosure
+(c) Is independently developed
+(d) Is rightfully received from a third party
+
+5. TERM
+This Agreement shall remain in effect for {{TERM}}.
+
+6. RETURN OF MATERIALS
+Upon request, each party shall return or destroy all confidential materials.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement.
+
+{{SIGNATURE_BLOCK}}
+Variables to Replace:
+* {{DATE}} - Agreement date
+* {{PARTY_1}} - First party name
+* {{PARTY_2}} - Second party name
+* {{PURPOSE}} - Business purpose
+* {{CONFIDENTIALITY_DEFINITION}} - Scope
+* {{TERM}} - Duration (e.g., "two years")
+* {{SIGNATURE_BLOCK}} - Signature lines
+2.2 Firm History Index Schema
+File: data/firm_history/index.json
+{
+  "contracts": [
+    {
+      "id": "contract_001",
+      "filename": "drake_nda_2024.txt",
+      "client_name": "Drake",
+      "client_industry": "Music",
+      "contract_type": "mutual_nda",
+      "date_created": "2024-03-15",
+      "attorney": "John Smith",
+      "tags": ["entertainment", "recording", "collaboration"],
+      "key_clauses": {
+        "confidentiality_term": "3 years",
+        "jurisdiction": "New York",
+        "special_provisions": ["IP ownership", "master recordings"]
+      }
+    },
+    {
+      "id": "contract_002",
+      "filename": "beyonce_nda_2023.txt",
+      "client_name": "Beyoncé",
+      "client_industry": "Music",
+      "contract_type": "mutual_nda",
+      "date_created": "2023-09-22",
+      "attorney": "Jane Doe",
+      "tags": ["entertainment", "music", "touring"],
+      "key_clauses": {
+        "confidentiality_term": "5 years",
+        "jurisdiction": "California",
+        "special_provisions": ["Tour details", "Brand partnerships"]
+      }
+    }
+  ]
+}
+2.3 Client Database Schema
+File: data/clients/clients.json
+{
+  "clients": [
+    {
+      "id": "client_001",
+      "name": "Drake",
+      "industry": "Music",
+      "sub_industry": "Recording Artist",
+      "first_engagement": "2022-01-10",
+      "total_contracts": 5,
+      "preferred_terms": {
+        "confidentiality_duration": "3 years",
+        "jurisdiction": "New York",
+        "payment_terms": "Net 30"
+      },
+      "notes": "Prefers shorter confidentiality terms. Always includes IP ownership clauses."
+    },
+    {
+      "id": "client_002",
+      "name": "Universal Studios",
+      "industry": "Film",
+      "sub_industry": "Production",
+      "first_engagement": "2020-05-15",
+      "total_contracts": 12,
+      "preferred_terms": {
+        "confidentiality_duration": "5 years",
+        "jurisdiction": "California",
+        "payment_terms": "Net 60"
+      },
+      "notes": "Large studio. Standard terms. Requires insurance provisions."
+    }
+  ]
+}
+2.4 Due Diligence Checklist Schema
+File: data/config/due_diligence_checklist.json
+{
+  "checklist": {
+    "party_identification": {
+      "name": "Party Identification",
+      "priority": 1,
+      "questions": [
+        "Who are the contracting parties?",
+        "Are entities properly identified with addresses?",
+        "Any parent/subsidiary relationships?",
+        "Any red flags in party names?"
+      ],
+      "risk_keywords": ["shell company", "offshore", "unnamed party"]
+    },
+    "financial_terms": {
+      "name": "Financial Terms",
+      "priority": 1,
+      "questions": [
+        "What are payment amounts and schedules?",
+        "Are there penalties or late fees?",
+        "Any financial guarantees required?",
+        "Currency and payment method specified?"
+      ],
+      "risk_keywords": ["unlimited", "no cap", "penalties exceeding", "upfront payment"]
+    },
+    "liability_indemnification": {
+      "name": "Liability & Indemnification",
+      "priority": 1,
+      "questions": [
+        "Is there a liability cap?",
+        "What is indemnification scope?",
+        "Are there insurance requirements?",
+        "Any exclusions from liability?"
+      ],
+      "risk_keywords": ["unlimited liability", "any and all claims", "no cap", "gross negligence excluded"]
+    },
+    "termination_rights": {
+      "name": "Termination Rights",
+      "priority": 1,
+      "questions": [
+        "What are notice periods?",
+        "Termination for cause vs convenience?",
+        "What are consequences of termination?",
+        "Any automatic renewal provisions?"
+      ],
+      "risk_keywords": ["may terminate at any time", "no notice", "automatic renewal", "perpetual"]
+    },
+    "intellectual_property": {
+      "name": "Intellectual Property",
+      "priority": 2,
+      "questions": [
+        "Who owns created IP?",
+        "Are there licensing terms?",
+        "Any restrictions on IP use?",
+        "What about pre-existing IP?"
+      ],
+      "risk_keywords": ["all intellectual property", "exclusive license", "work for hire", "no rights retained"]
+    },
+    "confidentiality": {
+      "name": "Confidentiality",
+      "priority": 2,
+      "questions": [
+        "What is scope of confidentiality?",
+        "How long does it last?",
+        "What are the exceptions?",
+        "Are there return obligations?"
+      ],
+      "risk_keywords": ["in perpetuity", "indefinitely", "no time limit", "all information"]
+    },
+    "regulatory_compliance": {
+      "name": "Regulatory Compliance",
+      "priority": 2,
+      "questions": [
+        "Are there industry-specific requirements?",
+        "Any licenses or permits needed?",
+        "Compliance with relevant laws mentioned?",
+        "Who is responsible for compliance?"
+      ],
+      "risk_keywords": ["no compliance required", "assume all risk", "waive regulatory"]
+    },
+    "dispute_resolution": {
+      "name": "Dispute Resolution",
+      "priority": 3,
+      "questions": [
+        "What is the governing law?",
+        "What is the jurisdiction?",
+        "Is there arbitration?",
+        "Who pays legal fees?"
+      ],
+      "risk_keywords": ["foreign jurisdiction", "no arbitration", "loser pays all fees"]
+    },
+    "material_adverse_changes": {
+      "name": "Material Adverse Changes",
+      "priority": 3,
+      "questions": [
+        "Is there a force majeure clause?",
+        "What about change of control?",
+        "Are there material adverse change provisions?",
+        "Assignment restrictions?"
+      ],
+      "risk_keywords": ["no force majeure", "change of control terminates", "cannot assign"]
+    },
+    "conflicts_of_interest": {
+      "name": "Conflicts of Interest",
+      "priority": 2,
+      "questions": [
+        "Any related party transactions?",
+        "Competing obligations mentioned?",
+        "Exclusivity requirements?",
+        "Non-compete provisions?"
+      ],
+      "risk_keywords": ["exclusive", "non-compete", "cannot work with", "related party"]
+    }
+  }
+}
+2.5 Risk Patterns Schema
+File: data/config/risk_patterns.json
+{
+  "patterns": {
+    "unlimited_liability": {
+      "severity": "critical",
+      "keywords": [
+        "unlimited liability",
+        "any and all claims",
+        "without limitation",
+        "no cap on liability",
+        "all liabilities"
+      ],
+      "description": "Unlimited liability exposure detected",
+      "recommendation": "Add cap equal to fees paid in prior 12 months. Exclude gross negligence."
+    },
+    "one_sided_termination": {
+      "severity": "high",
+      "keywords": [
+        "may terminate at any time",
+        "without cause",
+        "at sole discretion",
+        "for any reason",
+        "terminate immediately"
+      ],
+      "description": "One-sided termination rights detected",
+      "recommendation": "Require notice period (30-90 days) and mutual termination rights."
+    },
+    "auto_renewal": {
+      "severity": "high",
+      "keywords": [
+        "automatically renew",
+        "unless notice provided",
+        "90 days notice",
+        "perpetual renewal",
+        "automatically extend"
+      ],
+      "description": "Auto-renewal with excessive notice period",
+      "recommendation": "Reduce to 30-day notice or require affirmative renewal consent."
+    },
+    "broad_indemnification": {
+      "severity": "high",
+      "keywords": [
+        "indemnify and hold harmless",
+        "defend and indemnify",
+        "from any claims",
+        "including attorney fees"
+      ],
+      "description": "Broad indemnification clause",
+      "recommendation": "Limit to claims arising from your negligence or breach."
+    },
+    "excessive_payment_terms": {
+      "severity": "medium",
+      "keywords": [
+        "60 days",
+        "90 days",
+        "120 days",
+        "net 60",
+        "net 90"
+      ],
+      "description": "Payment terms exceed market standard (30 days)",
+      "recommendation": "Negotiate to net 30 or request early payment discount."
+    },
+    "broad_ip_assignment": {
+      "severity": "high",
+      "keywords": [
+        "all intellectual property",
+        "any and all IP",
+        "work product",
+        "automatically assigned",
+        "hereby assign"
+      ],
+      "description": "Broad IP assignment beyond scope of work",
+      "recommendation": "Limit to deliverables specifically created for this project."
+    }
+  }
+}
+
+3. Core Components Design
+3.1 ContractDrafter Class
+File: src/contract_drafter.py
+class ContractDrafter:
+    """
+    Handles contract drafting using firm history and templates.
+    
+    Phase 2: This class becomes a CrewAI Agent or LangGraph node
+    """
+    
+    def __init__(self, templates_dir, history_dir, clients_file):
+        self.templates_dir = templates_dir
+        self.history_dir = history_dir
+        self.clients = self.load_clients(clients_file)
+        self.history_index = self.load_history_index()
+        self.gpt_client = GPT4Client()
+    
+    def search_firm_history(self, client_name, industry, contract_type):
+        """
+        Find relevant previous contracts using simple keyword matching.
+        
+        Args:
+            client_name (str): Name of client
+            industry (str): Industry category (Music, Film, etc.)
+            contract_type (str): Type of contract (mutual_nda, etc.)
+        
+        Returns:
+            list: Top 3 matching contracts with metadata
+        """
+        matches = []
+        
+        # Search history index
+        for contract in self.history_index['contracts']:
+            score = 0
+            
+            # Exact client match (highest priority)
+            if contract['client_name'].lower() == client_name.lower():
+                score += 100
+            
+            # Industry match
+            if contract['client_industry'].lower() == industry.lower():
+                score += 50
+            
+            # Contract type match
+            if contract['contract_type'] == contract_type:
+                score += 75
+            
+            if score > 0:
+                matches.append({
+                    'contract': contract,
+                    'score': score
+                })
+        
+        # Sort by score and return top 3
+        matches.sort(key=lambda x: x['score'], reverse=True)
+        return [m['contract'] for m in matches[:3]]
+    
+    def generate_draft(self, client_name, industry, contract_type, 
+                      purpose, party1, party2, term):
+        """
+        Generate contract draft using template and firm history.
+        
+        Args:
+            client_name (str): Client name
+            industry (str): Industry
+            contract_type (str): Template to use
+            purpose (str): Business purpose
+            party1 (str): First party name
+            party2 (str): Second party name
+            term (str): Duration (e.g., "two years")
+        
+        Returns:
+            dict: {
+                'draft': str,
+                'matched_contracts': list,
+                'template_used': str
+            }
+        """
+        # 1. Search firm history
+        matched_contracts = self.search_firm_history(
+            client_name, industry, contract_type
+        )
+        
+        # 2. Load base template
+        template_path = os.path.join(
+            self.templates_dir, 
+            f"{contract_type}.txt"
+        )
+        with open(template_path, 'r') as f:
+            template = f.read()
+        
+        # 3. Load matched contract content (for context)
+        history_content = []
+        for contract in matched_contracts:
+            contract_path = os.path.join(
+                self.history_dir,
+                'contracts',
+                contract['filename']
+            )
+            with open(contract_path, 'r') as f:
+                history_content.append({
+                    'client': contract['client_name'],
+                    'content': f.read()
+                })
+        
+        # 4. Use GPT-4 or other LLM to generate draft
+        draft = self.gpt_client.draft_contract(
+            template=template,
+            history_contracts=history_content,
+            client_name=client_name,
+            industry=industry,
+            purpose=purpose,
+            party1=party1,
+            party2=party2,
+            term=term
+        )
+        
+        return {
+            'draft': draft,
+            'matched_contracts': matched_contracts,
+            'template_used': contract_type
+        }
+3.2 ContractReviewer Class
+File: src/contract_reviewer.py
+class ContractReviewer:
+    """
+    Handles contract review against due diligence checklist.
+    
+    Phase 2: This class becomes a CrewAI Agent or LangGraph node
+    """
+    
+    def __init__(self, checklist_file, patterns_file):
+        self.checklist = self.load_checklist(checklist_file)
+        self.risk_patterns = self.load_patterns(patterns_file)
+        self.gpt_client = GPT4Client()
+    
+    def extract_text(self, file_path):
+        """
+        Extract text from uploaded contract file.
+        
+        Args:
+            file_path (str): Path to PDF or DOCX file
+        
+        Returns:
+            str: Extracted text
+        """
+        file_ext = os.path.splitext(file_path)[1].lower()
+        
+        if file_ext == '.pdf':
+            return self.extract_from_pdf(file_path)
+        elif file_ext == '.docx':
+            return self.extract_from_docx(file_path)
+        elif file_ext == '.txt':
+            with open(file_path, 'r') as f:
+                return f.read()
+        else:
+            raise ValueError(f"Unsupported file type: {file_ext}")
+    
+    def extract_from_pdf(self, file_path):
+        """Extract text from PDF using PyMuPDF."""
+        import fitz  # PyMuPDF
+        doc = fitz.open(file_path)
+        text = ""
+        for page in doc:
+            text += page.get_text()
+        return text
+    
+    def extract_from_docx(self, file_path):
+        """Extract text from DOCX using python-docx."""
+        from docx import Document
+        doc = Document(file_path)
+        text = "\n".join([para.text for para in doc.paragraphs])
+        return text
+    
+    def flag_critical_issues(self, contract_text):
+        """
+        Flag critical issues using pattern matching.
+        
+        Args:
+            contract_text (str): Contract text
+        
+        Returns:
+            list: Critical issues found
+        """
+        issues = []
+        
+        for pattern_id, pattern in self.risk_patterns['patterns'].items():
+            for keyword in pattern['keywords']:
+                if keyword.lower() in contract_text.lower():
+                    # Found a match - extract context
+                    context = self.extract_context(contract_text, keyword)
+                    
+                    issues.append({
+                        'pattern_id': pattern_id,
+                        'severity': pattern['severity'],
+                        'keyword': keyword,
+                        'context': context,
+                        'description': pattern['description'],
+                        'recommendation': pattern['recommendation']
+                    })
+                    break  # Only flag pattern once
+        
+        return issues
+    
+    def extract_context(self, text, keyword, window=200):
+        """Extract text around keyword for context."""
+        idx = text.lower().find(keyword.lower())
+        if idx == -1:
+            return ""
+        
+        start = max(0, idx - window)
+        end = min(len(text), idx + len(keyword) + window)
+        
+        return "..." + text[start:end] + "..."
+    
+    def analyze_against_checklist(self, contract_text):
+        """
+        Analyze contract against due diligence checklist using GPT-4.
+        
+        Args:
+            contract_text (str): Contract text
+        
+        Returns:
+            dict: Checklist analysis results
+        """
+        checklist_results = {}
+        
+        for category_id, category in self.checklist['checklist'].items():
+            # Use GPT-4 to answer checklist questions
+            analysis = self.gpt_client.analyze_checklist_category(
+                contract_text=contract_text,
+                category_name=category['name'],
+                questions=category['questions'],
+                risk_keywords=category['risk_keywords']
+            )
+            
+            checklist_results[category_id] = {
+                'name': category['name'],
+                'priority': category['priority'],
+                'analysis': analysis
+            }
+        
+        return checklist_results
+    
+    def generate_report(self, contract_text, checklist_results, critical_issues):
+        """
+        Generate due diligence report.
+        
+        Args:
+            contract_text (str): Original contract
+            checklist_results (dict): Checklist analysis
+            critical_issues (list): Flagged critical issues
+        
+        Returns:
+            str: Formatted report (markdown)
+        """
+        # Categorize issues
+        critical = [i for i in critical_issues if i['severity'] == 'critical']
+        high = [i for i in critical_issues if i['severity'] == 'high']
+        medium = [i for i in critical_issues if i['severity'] == 'medium']
+        
+        # Determine overall risk
+        if len(critical) > 0:
+            overall_risk = "CRITICAL"
+        elif len(high) >= 3:
+            overall_risk = "HIGH"
+        elif len(high) > 0:
+            overall_risk = "MEDIUM"
+        else:
+            overall_risk = "LOW"
+        
+        # Build report
+        report = f"""# Due Diligence Report
+
+## Executive Summary
+
+**Overall Risk Assessment:** {overall_risk}
+
+**Issues Found:**
+- ?? Critical: {len(critical)}
+- ?? High Priority: {len(high)}
+- ?? Medium Priority: {len(medium)}
+
+**Top 3 Concerns:**
+"""
+        
+        # Add top 3 issues
+        top_issues = critical[:3] if len(critical) >= 3 else (critical + high)[:3]
+        for i, issue in enumerate(top_issues, 1):
+            emoji = "??" if issue['severity'] == 'critical' else "??"
+            report += f"""
+{i}. {emoji} **{issue['description']}**
+   - **Found:** "{issue['keyword']}"
+   - **Context:** {issue['context']}
+   - **Recommendation:** {issue['recommendation']}
+"""
+        
+        # Add checklist status
+        report += "\n\n## Checklist Analysis\n\n"
+        
+        for category_id, result in checklist_results.items():
+            report += f"### {result['name']}\n"
+            report += f"{result['analysis']}\n\n"
+        
+        # Add all issues by severity
+        if critical:
+            report += "\n## ?? Critical Issues\n\n"
+            for issue in critical:
+                report += f"**{issue['description']}**\n"
+                report += f"- Found: \"{issue['keyword']}\"\n"
+                report += f"- Recommendation: {issue['recommendation']}\n\n"
+        
+        if high:
+            report += "\n## ?? High Priority Issues\n\n"
+            for issue in high:
+                report += f"**{issue['description']}**\n"
+                report += f"- Found: \"{issue['keyword']}\"\n"
+                report += f"- Recommendation: {issue['recommendation']}\n\n"
+        
+        return report
+    
+    def review_contract(self, file_path):
+        """
+        Main method to review a contract.
+        
+        Args:
+            file_path (str): Path to contract file
+        
+        Returns:
+            dict: {
+                'contract_text': str,
+                'checklist_results': dict,
+                'critical_issues': list,
+                'report': str,
+                'overall_risk': str
+            }
+        """
+        # 1. Extract text
+        contract_text = self.extract_text(file_path)
+        
+        # 2. Flag critical issues (pattern matching)
+        critical_issues = self.flag_critical_issues(contract_text)
+        
+        # 3. Analyze against checklist (GPT-4)
+        checklist_results = self.analyze_against_checklist(contract_text)
+        
+        # 4. Generate report
+        report = self.generate_report(
+            contract_text, 
+            checklist_results, 
+            critical_issues
+        )
+        
+        # 5. Determine overall risk
+        critical_count = len([i for i in critical_issues if i['severity'] == 'critical'])
+        if critical_count > 0:
+            overall_risk = "CRITICAL"
+        elif len([i for i in critical_issues if i['severity'] == 'high']) >= 3:
+            overall_risk = "HIGH"
+        elif len(critical_issues) > 0:
+            overall_risk = "MEDIUM"
+        else:
+            overall_risk = "LOW"
+        
+        return {
+            'contract_text': contract_text,
+            'checklist_results': checklist_results,
+            'critical_issues': critical_issues,
+            'report': report,
+            'overall_risk': overall_risk
+        }
+3.3 GPT4Client Wrapper Class
+File: src/gpt4_client.py
+import os
+from openai import OpenAI
+
+class GPT4Client:
+    """
+    Wrapper for OpenAI GPT-4 API calls.
+    
+    Centralizes all LLM interactions for easy replacement/testing.
+    Phase 2: Can swap for different models or add caching.
+    """
+    
+    def __init__(self):
+        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        self.model = "gpt-4-turbo-preview"
+    
+    def draft_contract(self, template, history_contracts, client_name, 
+                      industry, purpose, party1, party2, term):
+        """
+        Generate contract draft using GPT-4.
+        
+        Args:
+            template (str): Base template text
+            history_contracts (list): Previous contracts for context
+            client_name (str): Client name
+            industry (str): Industry
+            purpose (str): Business purpose
+            party1 (str): First party
+            party2 (str): Second party
+            term (str): Duration
+        
+        Returns:
+            str: Generated contract draft
+        """
+        # Build context from history
+        history_context = ""
+        if history_contracts:
+            history_context = "\n\nPrevious agreements for context:\n"
+            for i, contract in enumerate(history_contracts, 1):
+                history_context += f"\n--- Contract {i} (Client: {contract['client']}) ---\n"
+                history_context += contract['content'][:2000]  # Limit length
+        
+        prompt = f"""You are a legal contract drafter for Grubman Shire Meiselas & Sacks, 
+a top entertainment and transactional law firm.
+
+Generate a complete contract based on the template and firm history provided.
+
+TEMPLATE:
+{template}
+
+CLIENT INFORMATION:
+- Name: {client_name}
+- Industry: {industry}
+- Purpose: {purpose}
+
+CONTRACT DETAILS:
+- Party 1: {party1}
+- Party 2: {party2}
+- Term: {term}
+
+{history_context}
+
+INSTRUCTIONS:
+1. Use the template structure
+2. Fill in all {{VARIABLES}} with appropriate content
+3. Incorporate relevant clauses from previous agreements when applicable
+4. Maintain professional legal language
+5. Ensure consistency with firm standards
+6. Make it complete and ready for review
+
+Generate the complete contract now:"""
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "You are an expert legal contract drafter."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,  # Lower temperature for consistency
+            max_tokens=3000
+        )
+        
+        return response.choices[0].message.content
+    
+    def analyze_checklist_category(self, contract_text, category_name, 
+                                   questions, risk_keywords):
+        """
+        Analyze contract against one checklist category.
+        
+        Args:
+            contract_text (str): Contract text
+            category_name (str): Category name
+            questions (list): Questions to answer
+            risk_keywords (list): Keywords that indicate risk
+        
+        Returns:
+            str: Analysis text
+        """
+        questions_text = "\n".join([f"- {q}" for q in questions])
+        keywords_text = ", ".join(risk_keywords)
+        
+        prompt = f"""You are a legal contract reviewer for Grubman Shire Meiselas & Sacks.
+
+Analyze the following contract section: {category_name}
+
+CONTRACT TEXT:
+{contract_text[:4000]}  # Limit to avoid token limits
+
+QUESTIONS TO ANSWER:
+{questions_text}
+
+RISK KEYWORDS TO CHECK:
+{keywords_text}
+
+Provide a concise analysis covering:
+1. Answer each question
+2. Note any risk keywords found
+3. Flag any concerns
+4. Suggest any missing provisions
+
+Keep analysis to 3-4 paragraphs maximum."""
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": "You are an expert legal contract reviewer."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.2,
+            max_tokens=500
+        )
+        
+        return response.choices[0].message.content
+
+4. User Interface Design
+4.1 Streamlit Application Structure
+File: app.py
+import streamlit as st
+from src.contract_drafter import ContractDrafter
+from src.contract_reviewer import ContractReviewer
+import os
+from datetime import datetime
+
+# Page config
+st.set_page_config(
+    page_title="Grubman Contract Assistant",
+    page_icon="??",
+    layout="wide"
+)
+
+# Initialize session state
+if 'draft_result' not in st.session_state:
+    st.session_state.draft_result = None
+if 'review_result' not in st.session_state:
+    st.session_state.review_result = None
+
+# Header
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.image("assets/grubman_logo.png", width=100)  # Placeholder
+with col2:
+    st.title("Grubman Contract Assistant")
+    st.caption("AI-Powered Contract Drafting & Due Diligence")
+
+# Tabs
+tab1, tab2 = st.tabs(["?? Draft Contract", "?? Review Contract"])
+
+# --- TAB 1: DRAFT CONTRACT ---
+with tab1:
+    st.header("Draft Contract from Firm History")
+    
+    # Initialize drafter
+    drafter = ContractDrafter(
+        templates_dir="data/templates",
+        history_dir="data/firm_history",
+        clients_file="data/clients/clients.json"
+    )
+    
+    # Input form
+    with st.form("draft_form"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            contract_type = st.selectbox(
+                "Contract Type",
+                ["mutual_nda", "oneway_nda", "service_agreement"],
+                format_func=lambda x: x.replace("_", " ").title()
+            )
+            
+            client_name = st.text_input("Client Name", "Taylor Martinez")
+            
+            industry = st.selectbox(
+                "Industry",
+                ["Music", "Film", "Sports", "Corporate", "Technology"]
+            )
+        
+        with col2:
+            party1 = st.text_input("First Party", "Grubman Shire Meiselas & Sacks")
+            party2 = st.text_input("Second Party", "")
+            term = st.text_input("Term Duration", "two years")
+        
+        purpose = st.text_area(
+            "Business Purpose",
+            "Discussing potential representation agreement"
+        )
+        
+        submitted = st.form_submit_button("?? Generate Contract", type="primary")
+    
+    # Generate draft
+    if submitted:
+        with st.spinner("Searching firm history and generating draft..."):
+            try:
+                result = drafter.generate_draft(
+                    client_name=client_name,
+                    industry=industry,
+                    contract_type=contract_type,
+                    purpose=purpose,
+                    party1=party1,
+                    party2=party2 or client_name,
+                    term=term
+                )
+                st.session_state.draft_result = result
+                st.success("? Contract generated successfully!")
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+    
+    # Display results
+    if st.session_state.draft_result:
+        result = st.session_state.draft_result
+        
+        # Show matched contracts
+        st.subheader("?? Firm History Matches")
+        if result['matched_contracts']:
+            for contract in result['matched_contracts']:
+                st.info(f"? Similar to: **{contract['client_name']}** ({contract['contract_type'].replace('_', ' ').title()}) - {contract['date_created']}")
+        else:
+            st.warning("No previous contracts found. Using standard template.")
+        
+        # Show draft
+        st.subheader("?? Generated Draft")
+        draft_text = st.text_area(
+            "Edit as needed:",
+            value=result['draft'],
+            height=400
+        )
+        
+        # Download buttons
+        col1, col2 = st.columns(2)
+        with col1:
+            st.download_button(
+                label="?? Download as TXT",
+                data=draft_text,
+                file_name=f"{client_name}_{contract_type}_{datetime.now().strftime('%Y%m%d')}.txt",
+                mime="text/plain"
+            )
+        with col2:
+            # Note: Phase 2 will add proper DOCX export
+            st.download_button(
+                label="?? Download as DOCX (Basic)",
+                data=draft_text,
+                file_name=f"{client_name}_{contract_type}_{datetime.now().strftime('%Y%m%d')}.txt",
+                mime="text/plain"
+            )
+
+# --- TAB 2: REVIEW CONTRACT ---
+with tab2:
+    st.header("Due Diligence Contract Review")
+    
+    # Initialize reviewer
+    reviewer = ContractReviewer(
+        checklist_file="data/config/due_diligence_checklist.json",
+        patterns_file="data/config/risk_patterns.json"
+    )
+    
+    # File upload
+    uploaded_file = st.file_uploader(
+        "Upload Contract (PDF, DOCX, or TXT)",
+        type=["pdf", "docx", "txt"]
+    )
+    
+    if uploaded_file:
+        # Save uploaded file temporarily
+        temp_dir = "temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_path = os.path.join(temp_dir, uploaded_file.name)
+        
+        with open(temp_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        
+        # Review button
+        if st.button("?? Analyze Contract", type="primary"):
+            with st.spinner("Analyzing contract against due diligence checklist..."):
+                try:
+                    result = reviewer.review_contract(temp_path)
+                    st.session_state.review_result = result
+                    st.success("? Analysis complete!")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+        
+        # Clean up temp file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+    
+    # Display results
+    if st.session_state.review_result:
+        result = st.session_state.review_result
+        
+        # Risk summary
+        st.subheader("?? Risk Assessment")
+        
+        risk_color = {
+            "CRITICAL": "??",
+            "HIGH": "??",
+            "MEDIUM": "??",
+            "LOW": ""
+        }
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(
+                "Overall Risk",
+                f"{risk_color.get(result['overall_risk'], '?')} {result['overall_risk']}"
+            )
+        with col2:
+            critical_count = len([i for i in result['critical_issues'] if i['severity'] == 'critical'])
+            st.metric("Critical Issues", critical_count)
+        with col3:
+            high_count = len([i for i in result['critical_issues'] if i['severity'] == 'high'])
+            st.metric("High Priority", high_count)
+        
+        # Full report
+        st.subheader("?? Due Diligence Report")
+        st.markdown(result['report'])
+        
+        # Download report
+        st.download_button(
+            label="?? Download Report",
+            data=result['report'],
+            file_name=f"due_diligence_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
+            mime="text/markdown"
+        )
+
+# Footer
+st.divider()
+st.caption("Grubman Contract Assistant v1.0 | Powered by GPT-4")
+4.2 UI Mockups
+Tab 1: Draft Contract
++-------------------------------------------------------------+
+¦  [Logo]  Grubman Contract Assistant                        ¦
+¦          AI-Powered Contract Drafting & Due Diligence      ¦
++-------------------------------------------------------------¦
+¦  [?? Draft Contract]  [?? Review Contract]                 ¦
++-------------------------------------------------------------¦
+¦                                                             ¦
+¦  Draft Contract from Firm History                          ¦
+¦                                                             ¦
+¦  +--------------------+  +-----------------------------+  ¦
+¦  ¦ Contract Type ?    ¦  ¦ First Party                 ¦  ¦
+¦  ¦ Mutual NDA         ¦  ¦ Grubman Shire...            ¦  ¦
+¦  +--------------------+  +-----------------------------+  ¦
+¦                                                             ¦
+¦  +--------------------+  +-----------------------------+  ¦
+¦  ¦ Client Name        ¦  ¦ Second Party                ¦  ¦
+¦  ¦ Taylor Martinez    ¦  ¦ Taylor Martinez             ¦  ¦
+¦  +--------------------+  +-----------------------------+  ¦
+¦                                                             ¦
+¦  +--------------------+  +-----------------------------+  ¦
+¦  ¦ Industry ?         ¦  ¦ Term Duration               ¦  ¦
+¦  ¦ Music              ¦  ¦ two years                   ¦  ¦
+¦  +--------------------+  +-----------------------------+  ¦
+¦                                                             ¦
+¦  +-------------------------------------------------------+ ¦
+¦  ¦ Business Purpose                                      ¦ ¦
+¦  ¦ Discussing potential representation agreement        ¦ ¦
+¦  +-------------------------------------------------------+ ¦
+¦                                                             ¦
+¦  [?? Generate Contract]                                    ¦
+¦                                                             ¦
+¦  ---------------------------------------------------------¦
+¦                                                             ¦
+¦  ?? Firm History Matches                                   ¦
+¦  ? Similar to: Drake (Mutual NDA) - 2024-03-15           ¦
+¦  ? Similar to: Beyoncé (Mutual NDA) - 2023-09-22         ¦
+¦                                                             ¦
+¦  ?? Generated Draft                                        ¦
+¦  +-------------------------------------------------------+ ¦
+¦  ¦ MUTUAL NON-DISCLOSURE AGREEMENT                       ¦ ¦
+¦  ¦                                                        ¦ ¦
+¦  ¦ This Agreement is entered into as of October 14...   ¦ ¦
+¦  ¦ [Editable text area with contract content]           ¦ ¦
+¦  ¦                                                        ¦ ¦
+¦  +-------------------------------------------------------+ ¦
+¦                                                             ¦
+¦  [?? Download as TXT]  [?? Download as DOCX]              ¦
+¦                                                             ¦
++-------------------------------------------------------------+
+Tab 2: Review Contract
++-------------------------------------------------------------+
+¦  [Logo]  Grubman Contract Assistant                        ¦
+¦          AI-Powered Contract Drafting & Due Diligence      ¦
++-------------------------------------------------------------¦
+¦  [?? Draft Contract]  [?? Review Contract]                 ¦
++-------------------------------------------------------------¦
+¦                                                             ¦
+¦  Due Diligence Contract Review                             ¦
+¦                                                             ¦
+¦  +-------------------------------------------------------+ ¦
+¦  ¦  ?? Drag and drop file here                           ¦ ¦
+¦  ¦     or click to browse                                ¦ ¦
+¦  ¦                                                        ¦ ¦
+¦  ¦  Supported: PDF, DOCX, TXT (Max 10MB)                ¦ ¦
+¦  +-------------------------------------------------------+ ¦
+¦                                                             ¦
+¦  ?? vendor_services_agreement.pdf (2.3 MB)                 ¦
+¦                                                             ¦
+¦  [?? Analyze Contract]                                     ¦
+¦                                                             ¦
+¦  ---------------------------------------------------------¦
+¦                                                             ¦
+¦  ?? Risk Assessment                                        ¦
+¦                                                             ¦
+¦  Overall Risk        Critical Issues      High Priority    ¦
+¦  ?? HIGH              3                   5                ¦
+¦                                                             ¦
+¦  ---------------------------------------------------------¦
+¦                                                             ¦
+¦  ?? Due Diligence Report                                   ¦
+¦                                                             ¦
+¦  Executive Summary                                         ¦
+¦  Overall Risk Assessment: HIGH                             ¦
+¦                                                             ¦
+¦  Issues Found:                                             ¦
+¦  • ?? Critical: 3                                          ¦
+¦  • ?? High Priority: 5                                     ¦
+¦  • ?? Medium Priority: 8                                   ¦
+¦                                                             ¦
+¦  Top 3 Concerns:                                           ¦
+¦  1. ?? Unlimited Liability (Section 7.2)                  ¦
+¦     Found: "any and all claims"                           ¦
+¦     Recommendation: Add cap equal to fees paid...         ¦
+¦                                                             ¦
+¦  [Show more...]                                            ¦
+¦                                                             ¦
+¦  [?? Download Report]                                      ¦
+¦                                                             ¦
++-------------------------------------------------------------+
+
+5. Project Structure
+5.1 Directory Layout
+grubman-contract-assistant/
+¦
++-- app.py                          # Main Streamlit application
+¦
++-- src/                            # Source code
+¦   +-- __init__.py
+¦   +-- contract_drafter.py         # ContractDrafter class
+¦   +-- contract_reviewer.py        # ContractReviewer class
+¦   +-- gpt4_client.py              # GPT4Client wrapper
+¦
++-- data/                           # Data files
+¦   +-- templates/                  # Contract templates
+¦   ¦   +-- mutual_nda.txt
+¦   ¦   +-- oneway_nda.txt
+¦   ¦   +-- service_agreement.txt
+¦   ¦
+¦   +-- firm_history/               # Firm history
+¦   ¦   +-- contracts/              # Previous contracts
+¦   ¦   ¦   +-- drake_nda_2024.txt
+¦   ¦   ¦   +-- beyonce_nda_2023.txt
+¦   ¦   ¦   +-- ... (8 more)
+¦   ¦   +-- index.json              # Contract metadata
+¦   ¦
+¦   +-- clients/                    # Client database
+¦   ¦   +-- clients.json
+¦   ¦
+¦   +-- config/                     # Configuration
+¦       +-- due_diligence_checklist.json
+¦       +-- risk_patterns.json
+¦
++-- assets/                         # Static assets
+¦   +-- grubman_logo.png           # Logo (placeholder)
+¦   +-- styles.css                 # Custom CSS (if needed)
+¦
++-- temp/                           # Temporary uploads (gitignored)
+¦
++-- tests/                          # Unit tests (Phase 2)
+¦   +-- test_drafter.py
+¦   +-- test_reviewer.py
+¦
++-- requirements.txt                # Python dependencies
++-- .env                           # Environment variables (gitignored)
++-- .gitignore                     # Git ignore file
++-- README.md                      # Setup instructions
+5.2 Dependencies
+File: requirements.txt
+streamlit==1.29.0
+openai==1.6.1
+python-dotenv==1.0.0
+PyMuPDF==1.23.8
+python-docx==1.1.0
+5.3 Environment Variables
+File: .env.example
+# OpenAI API Configuration
+OPENAI_API_KEY=sk-your-key-here
+OPENAI_MODEL=gpt-4-turbo-preview
+
+# Application Settings
+APP_TITLE=Grubman Contract Assistant
+APP_VERSION=1.0
+DEBUG_MODE=false
+
+6. GitHub Resources to Leverage
+6.1 What We'll Borrow (Minimal Approach)
+Decision: Build from scratch using simple Python + Streamlit instead of cloning complex repos.
+Why:
+* ContractIQ uses vector databases (too complex for 4 days)
+* Other repos have dependencies we don't need
+* Building simple is faster than adapting complex code
+* We have clear requirements and can code directly
+What We'll Reference (Not Clone):
+1. Streamlit File Upload Pattern
+o Reference: Streamlit docs (https://docs.streamlit.io)
+o Use: st.file_uploader() examples
+o Time saved: 30 minutes (avoid trial-and-error)
+2. PyMuPDF Text Extraction
+o Reference: PyMuPDF docs
+o Use: Basic PDF text extraction code
+o Time saved: 1 hour (standard pattern)
+3. OpenAI API Integration
+o Reference: OpenAI Python library examples
+o Use: Chat completions pattern
+o Time saved: 30 minutes (API setup)
+What We WON'T Use:
+* ? ContractIQ (too complex with vector DB)
+* ? Legal summarizer repos (different use case)
+* ? Contract builders (different architecture)
+* ? Any workflow orchestration (building direct Python)
+6.2 Implementation Strategy
+Build Everything Ourselves Because:
+1. Requirements are clear and simple
+2. No complex dependencies needed
+3. Full control over code quality
+4. Easier to maintain and modify
+5. Prepares for Phase 2 agentic architecture
+6. Faster than debugging someone else's code
+
+7. API Integration Specifications
+7.1 OpenAI API Usage
+Authentication:
+from openai import OpenAI
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+Drafting Prompt Structure:
+# System message sets the role
+system_msg = "You are an expert legal contract drafter for Grubman Shire Meiselas & Sacks."
+
+# User message contains task and context
+user_msg = f"""Generate a complete {contract_type} based on:
+
+TEMPLATE:
+{template_text}
+
+CLIENT INFO:
+- Name: {client_name}
+- Industry: {industry}
+
+FIRM HISTORY (for context):
+{previous_contracts}
+
+Fill in all variables and make it complete."""
+
+# API call
+response = client.chat.completions.create(
+    model="gpt-4-turbo-preview",
+    messages=[
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": user_msg}
+    ],
+    temperature=0.3,  # Lower = more consistent
+    max_tokens=3000
+)
+Review Prompt Structure:
+system_msg = "You are an expert legal contract reviewer for Grubman Shire Meiselas & Sacks."
+
+user_msg = f"""Analyze this contract for: {category_name}
+
+CONTRACT TEXT:
+{contract_text}
+
+ANSWER THESE QUESTIONS:
+{questions}
+
+CHECK FOR THESE RISKS:
+{risk_keywords}
+
+Provide concise analysis (3-4 paragraphs)."""
+
+response = client.chat.completions.create(
+    model="gpt-4-turbo-preview",
+    messages=[
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": user_msg}
+    ],
+    temperature=0.2,
+    max_tokens=500
+)
+7.2 Token Management
+Estimated Token Usage:
+Contract Drafting:
+* Input: ~1,500 tokens (template + history + instructions)
+* Output: ~2,000 tokens (full contract)
+* Total per draft: ~3,500 tokens
+* Cost: ~$0.05-0.10 per draft
+Contract Review:
+* Input per category: ~1,000 tokens (contract excerpt + questions)
+* Output per category: ~300 tokens (analysis)
+* 10 categories = ~13,000 tokens total
+* Cost: ~$0.15-0.25 per review
+Demo Budget:
+* 10 test drafts: $1.00
+* 10 test reviews: $2.50
+* Demo day (5 runs): $1.50
+* Total needed: ~$5-10 in OpenAI credits
+7.3 Rate Limiting & Error Handling
+import time
+from openai import RateLimitError, APIError
+
+def call_gpt4_with_retry(client, messages, max_retries=3):
+    """Call GPT-4 with exponential backoff retry."""
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=messages,
+                temperature=0.3,
+                max_tokens=3000
+            )
+            return response.choices[0].message.content
+        
+        except RateLimitError:
+            if attempt < max_retries - 1:
+                wait_time = (2 ** attempt) * 2  # 2, 4, 8 seconds
+                time.sleep(wait_time)
+            else:
+                raise
+        
+        except APIError as e:
+            if attempt < max_retries - 1:
+                time.sleep(2)
+            else:
+                raise
+
+8. Phase 2 Migration Path (Agentic AI)
+8.1 Current Architecture ? Agentic Architecture
+Phase 1 (Current):
+# Direct function calls
+drafter = ContractDrafter(...)
+result = drafter.generate_draft(params)
+Phase 2 (CrewAI):
+from crewai import Agent, Task, Crew
+
+# Functions become agents
+drafter_agent = Agent(
+    role="Contract Drafter",
+    goal="Generate contracts using firm history",
+    backstory="Expert at Grubman's contract standards",
+    tools=[search_history_tool, template_tool]
+)
+
+history_agent = Agent(
+    role="History Researcher",
+    goal="Find relevant previous contracts",
+    backstory="Knows all firm contracts and precedents"
+)
+
+# Tasks define workflow
+search_task = Task(
+    description="Find similar contracts for {client} in {industry}",
+    agent=history_agent
+)
+
+draft_task = Task(
+    description="Generate contract using history and template",
+    agent=drafter_agent,
+    context=[search_task]  # Use history search results
+)
+
+# Crew orchestrates
+crew = Crew(
+    agents=[history_agent, drafter_agent],
+    tasks=[search_task, draft_task],
+    process=Process.sequential
+)
+
+result = crew.kickoff(inputs={"client": "...", "industry": "..."})
+8.2 Make.com Integration (Optional Phase 2)
+When to Use Make.com:
+* Client wants visual workflow builder
+* Need to integrate with other business tools
+* Want non-developers to modify workflows
+Architecture with Make.com:
+User ? Streamlit UI ? Webhook to Make.com ? Python Functions ? Results
+                         ?
+                    Make.com Workflow:
+                    1. Validate inputs
+                    2. Call Python API
+                    3. Log to database
+                    4. Send notifications
+                    5. Update CRM
+                    6. Return to Streamlit
+Implementation:
+# Expose Python functions as API endpoints
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/api/draft_contract', methods=['POST'])
+def api_draft_contract():
+    """Webhook endpoint for Make.com"""
+    data = request.json
+    
+    drafter = ContractDrafter(...)
+    result = drafter.generate_draft(**data)
+    
+    return jsonify(result)
+
+# Make.com calls this webhook
+# Returns results to Streamlit via another webhook
+8.3 Why Phase 1 Architecture Supports This
+Current Code is Agent-Ready:
+* ? Functions are modular and self-contained
+* ? Clear inputs and outputs
+* ? Stateless operations (no hidden dependencies)
+* ? Easy to wrap in Agent interface
+Migration Effort: 1-2 days
+* Wrap functions in Agent classes
+* Define Tasks
+* Create Crew orchestration
+* Test workflow
+No Rewriting Needed:
+* Core logic stays the same
+* Just add orchestration layer
+* Can run hybrid (some direct, some agentic)
+
+9. Testing Strategy
+9.1 Manual Testing (Phase 1)
+Contract Drafting Tests:
+Test CaseInputExpected OutputPass/FailDraft NDA for music clientClient: Taylor Martinez, Industry: MusicFinds Drake/Beyoncé contracts, generates complete NDA[ ]Draft NDA for new industryClient: Tech Corp, Industry: TechnologyUses template only, generates standard NDA[ ]Draft with no historyClient: Unknown, Industry: UnknownUses base template, generates minimal NDA[ ]Contract Review Tests:
+Test CaseInputExpected OutputPass/FailReview risky contractvendor_services.pdf with unlimited liabilityFlags critical issue, overall risk = HIGH[ ]Review standard contractsimple_nda.pdfNo critical issues, overall risk = LOW[ ]Review with missing clausesincomplete_contract.pdfLists missing provisions[ ]9.2 Performance Benchmarks
+Target Performance:
+* Contract draft generation: < 30 seconds
+* Firm history search: < 5 seconds
+* Contract upload & text extraction: < 10 seconds
+* Due diligence analysis: < 2 minutes
+* Report generation: < 5 seconds
+Load Testing (Phase 2):
+* Concurrent users: 5+
+* Multiple contracts queued: 10+
+* Response time under load: < 2x normal
+9.3 Error Handling Tests
+Scenarios to Test:
+* Invalid file upload (wrong format)
+* Empty contract text
+* OpenAI API key missing/invalid
+* API rate limit exceeded
+* Network connection failure
+* Corrupt PDF file
+* Missing template file
+* Invalid JSON in data files
+Error Messages:
+* User-friendly (not technical)
+* Actionable (tell user what to do)
+* Logged for debugging
+
+10. Deployment Plan
+10.1 Local Development Setup
+Prerequisites:
+* Python 3.11+
+* OpenAI API key ($10 budget)
+* Git
+* Code editor (VS Code recommended)
+Setup Steps:
+# 1. Create project directory
+mkdir grubman-contract-assistant
+cd grubman-contract-assistant
+
+# 2. Create virtual environment
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# Mac/Linux
+source venv/bin/activate
+
+# 3. Install dependencies
+pip install streamlit openai python-dotenv PyMuPDF python-docx
+
+# 4. Create .env file
+echo "OPENAI_API_KEY=sk-your-key-here" > .env
+
+# 5. Create directory structure
+mkdir -p src data/templates data/firm_history/contracts data/clients data/config assets temp
+
+# 6. Run application
+streamlit run app.py
+10.2 Demo Day Deployment
+Primary: Local Laptop
+* Run on presentation laptop
+* No internet dependency (except OpenAI API)
+* Full control
+* Fastest performance
+Backup: Streamlit Cloud
+* Deploy to Streamlit Community Cloud (free)
+* Accessible via URL
+* Internet required
+* Share link with Larry Shire after demo
+Streamlit Cloud Deployment:
+# 1. Create GitHub repository
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/your-username/grubman-demo.git
+git push -u origin main
+
+# 2. Go to share.streamlit.io
+# 3. Connect GitHub repo
+# 4. Add secrets (OPENAI_API_KEY) in settings
+# 5. Deploy
+
+# URL will be: https://your-app.streamlit.app
+Fallback: Pre-recorded Video
+* Record full demo on Day 4
+* Upload to private YouTube/Vimeo
+* Play if live demo fails
+10.3 Demo Day Checklist
+Day Before (October 17):
+* [ ] Test on presentation laptop
+* [ ] Verify OpenAI API key works
+* [ ] Load all sample data
+* [ ] Run through both scenarios 3x
+* [ ] Record backup video
+* [ ] Charge laptop fully
+* [ ] Prepare mobile hotspot
+* [ ] Print one-page handout
+Day Of (October 18):
+* [ ] Arrive early
+* [ ] Test venue WiFi (or use hotspot)
+* [ ] Open application before demo
+* [ ] Pre-warm GPT-4 (run one test)
+* [ ] Have backup video ready
+* [ ] Close unnecessary programs
+* [ ] Silence notifications
+11. Data Preparation Checklist
+11.1 Templates to Create (Day 1)
+Template 1: Mutual NDA ?
+* Standard Grubman format
+* Entertainment industry focus
+* 2-3 pages
+Template 2: One-Way NDA ?
+* For vendor/service provider relationships
+* 2 pages
+Template 3: Service Agreement ?
+* Representation/consulting format
+* 4-5 pages
+Where to Get:
+* Ask Grubman for samples (preferred)
+* Use online legal template sites as reference
+* Modify to match Grubman style
+11.2 Firm History to Create (Day 1)
+10 Previous Contracts Needed:
+Music Industry (4 contracts):
+1. Drake - Mutual NDA (2024)
+2. Beyoncé - Mutual NDA (2023)
+3. Kendrick Lamar - Service Agreement (2024)
+4. Taylor Swift - One-Way NDA (2023)
+Film Industry (3 contracts): 5. Universal Studios - Service Agreement (2023) 6. Netflix - Mutual NDA (2024) 7. Warner Bros - One-Way NDA (2023)
+Sports (2 contracts): 8. LeBron James - Service Agreement (2024) 9. Serena Williams - Mutual NDA (2023)
+Corporate (1 contract): 10. Sony Music - Service Agreement (2024)
+How to Create:
+* Base on templates
+* Vary key clauses (terms, jurisdiction, special provisions)
+* Add realistic details
+* Keep 2-3 pages each
+11.3 Client Database (Day 1)
+15 Clients to Add:
+* 6 Music artists
+* 4 Film/TV entities
+* 3 Sports figures
+* 2 Corporate
+Information per Client:
+* Name
+* Industry/sub-industry
+* First engagement date
+* Total contracts
+* Preferred terms
+* Notes
+11.4 Eric Sacks' Checklist
+IF PROVIDED by Grubman:
+* Use exactly as given
+* Convert to JSON format
+* Add risk keywords
+IF NOT PROVIDED:
+* Use the checklist in requirements doc
+* Standard transactional DD checklist
+* Customize for entertainment/contracts focus
+
+12. Development Timeline
+12.1 Day-by-Day Schedule
+Day 1: Setup & Data Preparation (8 hours)
+Hour 1-2: Environment Setup
+* [ ] Create project directory
+* [ ] Install Python dependencies
+* [ ] Setup OpenAI API
+* [ ] Create directory structure
+* [ ] Initialize Git repository
+Hour 3-4: Template Creation
+* [ ] Create 3 contract templates
+* [ ] Test template variable substitution
+* [ ] Add to data/templates/
+Hour 5-6: Firm History
+* [ ] Create 10 previous contracts
+* [ ] Create index.json with metadata
+* [ ] Add to data/firm_history/
+Hour 7-8: Configuration
+* [ ] Create clients.json (15 clients)
+* [ ] Create due_diligence_checklist.json
+* [ ] Create risk_patterns.json
+* [ ] Test all data loads correctly
+Day 2: Contract Drafting Module (8 hours)
+Hour 1-2: ContractDrafter Class
+* [ ] Write ContractDrafter.init()
+* [ ] Write load_clients()
+* [ ] Write load_history_index()
+* [ ] Test data loading
+Hour 3-4: Search & Generation
+* [ ] Write search_firm_history()
+* [ ] Test search with various inputs
+* [ ] Write generate_draft() skeleton
+* [ ] Test without GPT-4 (mock)
+Hour 5-6: GPT-4 Integration
+* [ ] Write GPT4Client class
+* [ ] Write draft_contract() method
+* [ ] Test with real API calls
+* [ ] Tune prompts for quality
+Hour 7-8: Streamlit UI (Tab 1)
+* [ ] Create app.py
+* [ ] Build Tab 1 form
+* [ ] Wire up ContractDrafter
+* [ ] Test end-to-end flow
+* [ ] Add error handling
+
+Day 3: Due Diligence Module (8 hours)
+Hour 1-2: ContractReviewer Class
+* [ ] Write ContractReviewer.init()
+* [ ] Write extract_text() methods
+* [ ] Test PDF/DOCX extraction
+* [ ] Write load_checklist()
+Hour 3-4: Risk Detection
+* [ ] Write flag_critical_issues()
+* [ ] Test pattern matching
+* [ ] Write extract_context()
+* [ ] Test with sample contracts
+Hour 5-6: Checklist Analysis
+* [ ] Write analyze_against_checklist()
+* [ ] Integrate GPT-4 for category analysis
+* [ ] Test with sample contracts
+* [ ] Tune prompts
+Hour 7-8: Report Generation & UI
+* [ ] Write generate_report()
+* [ ] Build Tab 2 UI
+* [ ] Wire up ContractReviewer
+* [ ] Test end-to-end flow
+* [ ] Add error handling
+
+Day 4: Polish & Practice (8 hours)
+Hour 1-2: UI Polish
+* [ ] Add Grubman logo/branding
+* [ ] Add progress indicators
+* [ ] Improve error messages
+* [ ] Add helpful tooltips
+* [ ] Test all edge cases
+Hour 3-4: Sample Data & Quick Demo
+* [ ] Create 3 "quick demo" buttons
+* [ ] Pre-load sample scenarios
+* [ ] Test performance optimization
+* [ ] Ensure < 30 second response times
+Hour 5-6: Demo Preparation
+* [ ] Practice Scenario 1 (drafting) 3x
+* [ ] Practice Scenario 2 (review) 3x
+* [ ] Record backup video
+* [ ] Create demo script document
+* [ ] Prepare talking points
+Hour 7-8: Deployment & Testing
+* [ ] Deploy to Streamlit Cloud (backup)
+* [ ] Test on presentation laptop
+* [ ] Final end-to-end test
+* [ ] Create troubleshooting guide
+* [ ] Prepare handout materials
+
+13. Risk Mitigation
+13.1 Technical Risks
+RiskProbabilityMitigationOpenAI API failure during demoLowPre-cache responses, have mock modeSlow performance (> 30 sec)MediumOptimize prompts, use shorter examplesFile upload issuesLowTest all formats, have samples readyMissing data filesLowInclude all files in repo, validate on startupPython dependency issuesLowUse requirements.txt, test environment13.2 Demo Day Risks
+RiskProbabilityMitigationWiFi failureMediumRun locally, use mobile hotspotLaptop crashLowHave backup laptop, pre-recorded videoForgot to charge laptopLowCharge night before, bring chargerLarry Shire asks for feature we don't haveMediumHave Phase 2 roadmap readyDemo takes too longLowPractice timing, have 15-min version ready
+14. Success Metrics
+14.1 Technical Validation
+Before Demo Day:
+* [ ] 10+ successful contract drafts generated
+* [ ] 10+ contracts reviewed without errors
+* [ ] All response times < targets
+* [ ] No crashes in 20+ test runs
+* [ ] All sample data loads correctly
+* [ ] Backup video recorded
+14.2 Demo Day Success
+Must Achieve:
+* [ ] Demo runs without errors
+* [ ] Both scenarios complete successfully
+* [ ] Larry Shire engaged (asks questions)
+* [ ] Requests follow-up meeting
+* [ ] No technical issues
+Should Achieve:
+* [ ] Larry Shire says "impressive"
+* [ ] Compares favorably to competitors
+* [ ] Grubman team takes notes
+* [ ] Asks about pricing/timeline
+* [ ] Mentions specific use cases they'd use
+15. Phase 2 Roadmap Preview
+Features to Add Post-Demo:
+Immediate (Week 1-2):
+* Professional PDF export with formatting
+* Visual risk dashboard with charts
+* Advanced highlighting (green/yellow/red)
+* Clause provenance tracking
+Short-term (Month 1):
+* Vector database for semantic search
+* NetDocs API integration
+* Numeric risk scoring (0.0-1.0)
+* Market comparison data integration
+* Learning from approved edits
+Medium-term (Month 2-3):
+* Multi-agent orchestration (CrewAI)
+* Advanced conflict detection
+* Custom checklist editor
+* Batch processing
+* Analytics dashboard
+Long-term (Month 4-6):
+* Patent-protected algorithms
+* Cryptographic audit trails
+* Mobile app
+* Multi-user collaboration
+* Integration marketplace
+16. Appendix
+16.1 Glossary
+Terms Used in This Document:
+* Streamlit: Python web framework for rapid UI development
+* GPT-4: OpenAI's large language model
+* CrewAI: Multi-agent orchestration framework (Phase 2)
+* Vector Database: Database optimized for semantic search (Phase 2)
+* Agentic AI: AI systems with autonomous agents (Phase 2)
+* Make.com: No-code workflow automation platform (Phase 2 option)
+16.2 Reference Links
+Documentation:
+* Streamlit Docs: https://docs.streamlit.io
+* OpenAI API Docs: https://platform.openai.com/docs
+* PyMuPDF Docs: https://pymupdf.readthedocs.io
+* Python-docx Docs: https://python-docx.readthedocs.io
+Phase 2 Resources:
+* CrewAI: https://github.com/joaomdmoura/crewai
+* LangGraph: https://github.com/langchain-ai/langgraph
+* Make.com: https://www.make.com
+16.3 Contact & Support
+Development Team:
+* Lead Developer: [Your Name]
+* Project Manager: [Your Name]
+* Technical Advisor: Claude AI
+For Questions:
+* Technical issues: Check README.md
+* Demo questions: Review demo script
+* Phase 2 planning: Review roadmap section
+17. Approval & Sign-off
+17.1 Design Review Checklist
+Architecture:
+* [ ] Simple enough for 4-day implementation
+* [ ] Supports Phase 2 migration to agentic AI
+* [ ] No unnecessary complexity
+* [ ] All requirements addressed
+Technical Decisions:
+* [ ] Technology stack is appropriate
+* [ ] No external dependencies beyond OpenAI
+* [ ] Data models are clear and simple
+* [ ] API integration is straightforward
+Implementation Plan:
+* [ ] Timeline is realistic
+* [ ] Daily schedule is achievable
+* [ ] Risk mitigation is thorough
+* [ ] Success criteria are clear
+17.3 Next Steps Upon Approval
+* Immediate:
+o Obtain Eric Sacks' checklist (if available)
+o Get sample Grubman contracts (if available)
+o Get branding assets (logo, colors)
+* Tomorrow:
+o Create Implementation Guide (step-by-step coding instructions)
+o Begin Day 1 development
+* October 15-17:
+o Execute 4-day sprint per schedule above
+* October 18:
+o Demo with Larry Shire
+Document Control
+Prepared By: AI Development Team
+Date: October 14, 2025
+Version: 1.0
+Status: Ready for Review
+Related Documents:
+ Requirements Document v1.0 (Approved)
+ Implementation Guide v1.0 (Next)
+ Demo Script (To be created Day 4)
+Revision History:
+VersionDateChangesAuthor1.0Oct 14, 2025Initial designAI Team

@@ -1,0 +1,558 @@
+Grubman Contract Assistant - Requirements Document
+Version: 1.0 (Simplified for 4-Day Delivery)
+Date: October 14, 2025
+Client: Grubman Shire Meiselas & Sacks
+Delivery Date: October 18, 2025 (Demo Ready)
+Demo Duration: 30 minutes with Larry Shire
+
+1. Executive Summary
+1.1 Project Goal
+Build a working AI-powered contract assistant that demonstrates two critical capabilities for Grubman's transactional law practice:
+1. Smart Contract Drafting - Generate NDAs and contracts using firm history and previous agreements
+2. Automated Due Diligence - Review contracts against Eric Sacks' due diligence checklist
+1.2 Strategic Context
+* Grubman is evaluating NetDocs AI, Spellbook AI, and Harvey AI
+* They are a transactional law firm (entertainment, contracts, deals - NOT litigation)
+* Partners are attracted to polished, working demos
+* Larry Shire (key decision-maker) wants a 30-minute comparison demo
+* Timeline is NON-NEGOTIABLE: Must demo by October 18, 2025
+1.3 Success Criteria (Must Have)
+* ? Demo runs without errors during 30-minute presentation
+* ? Shows clear time savings over manual processes
+* ? Demonstrates firm-specific learning (uses client history)
+* ? Addresses Eric Sacks' due diligence requirements
+* ? Professional UI that compares favorably to competitors
+* ? Larry Shire says "impressive" and requests follow-up meeting
+1.4 Out of Scope (Phase 2)
+* ? NetDocs integration (will be Phase 2)
+* ? Patent-protected features (parallel processing, statistical bounds, etc.)
+* ? Multi-agent orchestration (unnecessary complexity for demo)
+* ? Cryptographic audit trails (Phase 2)
+* ? Conflict detection across all client obligations (Phase 2)
+2. Core Use Cases (FOCUS)
+2.1 Use Case #1: Contract Drafting from Firm History
+User Story:
+As a Grubman attorney
+I want to generate a new NDA or contract by referencing previous agreements for similar clients
+So that I can draft contracts 10x faster while maintaining firm standards
+Functional Requirements:
+FR-1.1: Template Selection
+* System provides 3 standard Grubman templates: 
+o Mutual NDA (for partnerships/collaborations)
+o One-Way NDA (for vendors/service providers)
+o Service Agreement (for consulting/representation)
+* Each template includes firm-standard language and structure
+* Templates are pre-loaded and immediately available
+FR-1.2: Client Context Input
+1. User enters: 
+1. Client name
+2. Client industry (e.g., "Music Artist", "Film Production", "Sports")
+3. Contract type (from dropdown)
+4. Key deal terms (parties, scope, dates)
+2. Simple form interface (5 fields max)
+FR-1.3: Firm History Search (Simplified for Phase 1)
+ System searches pre-loaded firm history for: 
+ Previous contracts with same client name (exact match)
+ Contracts from same industry category
+ Standard firm templates
+ Returns top 3 most relevant previous agreements
+ Shows simple match explanation ("Similar industry: Music Artist")
+Phase 2 Enhancements:
+ Advanced semantic search with vector embeddings
+ Similarity scoring (0.0-1.0)
+ "Find contracts where X clause was used"
+ Cross-reference multiple client attributes
+ Learn from usage patterns over time
+FR-1.4: Intelligent Draft Generation
+ System generates complete draft by: 
+ Starting with firm template
+ Incorporating client-specific clauses from previous agreements
+ Inserting user-provided deal terms
+ Maintaining consistent formatting
+ Generation completes in < 30 seconds
+ Draft is immediately editable
+FR-1.5: Draft Review Interface (Simplified for Phase 1)
+ Generated draft displays in text editor
+ Basic highlighting: 
+ Different sections are clearly separated
+ User must review and complete all sections
+ User can: 
+ Edit any section inline
+ Copy to clipboard
+ Download as TXT or basic DOCX
+Phase 2 Enhancements:
+ Advanced highlighting system: 
+ ?? Green: Standard firm language
+ ?? Yellow: Adapted from previous agreements
+ ?? Red: User must complete
+ View source of each clause ("From Beyoncé NDA, 2024")
+ Mark sections as "approved for future use"
+ Professional DOCX formatting with styles
+ PDF export with firm letterhead
+Performance Requirements:
+ Draft generation: < 30 seconds
+ Firm history search: < 5 seconds (simple keyword match)
+ No errors or crashes during demo
+Phase 2 Performance Targets:
+ Advanced semantic search: < 2 seconds
+ Risk score calculation: < 1 second per clause
+ Real-time clause provenance tracking
+Demo Scenario:
+Input:
+- Client: "Taylor Martinez (Recording Artist)"  
+- Contract Type: "Mutual NDA"
+- Industry: "Music"
+- Scope: "Discussing representation agreement"
+
+Expected Output (Phase 1 - Simplified):
+- System shows: "Found 2 matching agreements: Drake NDA (Music), 
+  Beyoncé NDA (Music)"
+- Generates complete NDA in 20-30 seconds
+- Draft displays in editable text area
+- User can review, edit, and download
+- Downloads as basic DOCX
+
+Demo Message: "What used to take 45 minutes now takes 5 minutes"
+
+Phase 2 Enhancements:
+- Sophisticated highlighting (green/yellow/red)
+- Clause provenance tracking ("from Drake NDA")
+- Learning from approved edits
+- Professional PDF output
+2.2 Use Case #2: Due Diligence Contract Review
+User Story:
+As a Grubman attorney (especially Eric Sacks)
+I want to review contracts against our due diligence checklist
+So that I can quickly identify risks and make informed recommendations
+Functional Requirements:
+FR-2.1: Contract Upload
+ User uploads contract file: 
+ Supported formats: PDF, DOCX, TXT
+ Max file size: 10 MB
+ Drag-and-drop or file browser
+ System extracts text and displays preview
+ Processing time: < 10 seconds
+FR-2.2: Due Diligence Checklist Engine
+ System implements Eric Sacks' due diligence checklist: 
+ Party Identification - Who are the parties? Any red flags?
+ Financial Terms - Payment amounts, schedules, penalties
+ Liability & Indemnification - Caps, exclusions, insurance
+ Termination Rights - Notice periods, cause, consequences
+ Intellectual Property - Ownership, licensing, restrictions
+ Confidentiality - Scope, duration, exceptions
+ Regulatory Compliance - Industry-specific requirements
+ Dispute Resolution - Jurisdiction, arbitration, governing law
+ Material Adverse Changes - Force majeure, change of control
+ Conflicts of Interest - Related parties, competing obligations
+FR-2.3: Automated Contract Analysis
+ System automatically: 
+ Parses document structure
+ Extracts and categorizes clauses
+ Maps clauses to checklist items
+ Identifies missing checklist items
+ Flags high-risk provisions
+ Compares to market standards
+ Analysis completes in < 2 minutes
+FR-2.4: Risk Scoring (Phase 2 - Advanced Feature)
+ Each checklist item receives risk assessment: 
+ ?? Critical (0.85-1.0): Requires immediate attention
+ ?? High (0.60-0.84): Should negotiate
+ ?? Medium (0.40-0.59): Review recommended
+ ?? Low (0.0-0.39): Acceptable
+ Overall contract risk score (0.0-1.0 scale)
+ Issues prioritized by severity and financial impact
+Phase 1 Simplified Approach:
+ Flag issues as: Critical / High Priority / Medium Priority
+ No numeric risk scores (simpler for demo)
+ Manual categorization based on pattern matching
+FR-2.5: Due Diligence Report (Simplified for Phase 1)
+ System generates basic report with: 
+ Executive Summary - Overall risk level (Critical/High/Medium/Low), top 3 concerns
+ Checklist Status - List showing completed vs missing items
+ Critical Issues - Detailed analysis with: 
+ Specific clause reference (e.g., "Section 7.2")
+ Why it's problematic
+ Recommended action
+ Missing Provisions - What should be added
+ Report displayed on screen (HTML format)
+Phase 2 Enhancements:
+ Visual checklist dashboard with charts
+ Market standard comparisons (requires market data)
+ Favorable terms analysis
+ Professional PDF export with formatting
+ Suggested redline language
+Performance Requirements:
+ Contract analysis: < 2 minutes
+ Report generation: < 30 seconds (display on screen, not PDF)
+ Accurate identification of major issues (critical/high priority)
+Phase 2 Performance Targets:
+ 90%+ accuracy on critical issue detection (with validation)
+ Sub-second clause categorization with ML models
+ Professional PDF generation with charts and formatting
+Demo Scenario:
+Input:
+- Upload: Vendor Services Agreement (PDF, 45 pages)
+- Run due diligence review
+
+Expected Output (Phase 1 - Simplified):
+- Analysis completes in 90-120 seconds
+- Overall Assessment: HIGH RISK (based on critical issues found)
+- Checklist Status: Shows which categories have issues
+- Top 3 Concerns:
+  1. ?? Unlimited Liability (Section 7.2)
+     "You must indemnify vendor for 'any and all claims' with no cap"
+     Recommendation: Add liability cap, exclude vendor negligence
+     
+  2. ?? One-Sided Termination (Section 10.1)
+     "Vendor may terminate at any time with 30 days notice"
+     Recommendation: Make termination rights mutual
+     
+  3. ?? Payment Terms (Section 3.4)
+     "60-day payment terms"
+     Recommendation: Negotiate to net 30
+     
+- Display report on screen
+- Copy to clipboard or save as TXT
+
+Demo Message: "What used to take 3 hours now takes 5 minutes. 
+Eric's checklist is automated."
+
+Phase 2 Enhancements:
+- Numeric risk scores (0.0-1.0)
+- Visual dashboard with charts
+- Market standard comparisons
+- Professional PDF report with formatting
+- Suggested redline language
+
+3. Technical Architecture (Simplified)
+3.1 Technology Stack
+Core Platform:
+ Base Code: ContractIQ (GitHub) - adapt basic structure, but simplify heavily
+ Programming Language: Python 3.11+
+ Web Framework: Streamlit (for rapid UI development)
+ AI/LLM: OpenAI GPT-4 (via API) for text generation and analysis
+Phase 1 Note: We'll use ContractIQ as reference but build a much simpler version without vector database complexity.
+Document Processing:
+ PDF: PyMuPDF (fitz)
+ DOCX: python-docx
+ Text Extraction: Built into above libraries
+Search & Retrieval:
+ Vector Database: ChromaDB (local, simple, fast) (Phase 2 - use simple keyword search for Phase 1)
+ Embeddings: OpenAI text-embedding-ada-002 (Phase 2)
+ Semantic Search: Built into ChromaDB (Phase 2)
+Phase 1 Approach:
+ Simple keyword/industry matching for firm history
+ No vector embeddings (saves setup time and API costs)
+ Adequate for demo purposes
+Deployment:
+ Primary: Local laptop (Windows/Mac) (Consider Cloud VM or VDI???)
+ Backup: Streamlit Cloud (internet access required)
+ Fallback: Pre-recorded video
+3.2 System Architecture
++---------------------------------------------------------+
+¦                    USER INTERFACE                       ¦
+¦              (Streamlit Web Application)                ¦
+¦                                                         ¦
+¦  Tab 1: Draft Contract  ¦  Tab 2: Review Contract      ¦
++---------------------------------------------------------+
+                           ?
++---------------------------------------------------------+
+¦               CONTRACT PROCESSING ENGINE                ¦
+¦                                                         ¦
+¦  • Document Parser (PDF/DOCX ? Text)                   ¦
+¦  • Template Library Manager                             ¦
+¦  • Simple Keyword Search (Phase 1)                      ¦
+¦  • Clause Extraction & Categorization                   ¦
+¦  • Basic Risk Flagging (Critical/High/Medium)           ¦
++---------------------------------------------------------+
+                           ?
++---------------------------------------------------------+
+¦                   DATA & KNOWLEDGE                      ¦
+¦                                                         ¦
+¦  +--------------+  +--------------+  +--------------+ ¦
+¦  ¦  Template    ¦  ¦  Firm        ¦  ¦  Due Dil.    ¦ ¦
+¦  ¦  Library     ¦  ¦  History     ¦  ¦  Checklist   ¦ ¦
+¦  ¦  (3 docs)    ¦  ¦  (JSON)      ¦  ¦  (Dict)      ¦ ¦
+¦  +--------------+  +--------------+  +--------------+ ¦
+¦                                                         ¦
+¦  Phase 2: Replace JSON with ChromaDB vector database   ¦
++---------------------------------------------------------+
+                           ?
++---------------------------------------------------------+
+¦                    EXTERNAL APIS                        ¦
+¦                                                         ¦
+¦  • OpenAI GPT-4 (contract generation, analysis)        ¦
+¦  Phase 2: Add embeddings API for semantic search       ¦
++---------------------------------------------------------+
+3.3 Data Requirements
+Template Library (3 documents):
+ Mutual NDA - Grubman standard
+ One-Way NDA - Grubman standard
+ Service Agreement - Grubman standard
+Firm History (10 previous agreements):
+ 3-4 Music industry NDAs (Drake, Beyoncé, etc.)
+ 2-3 Film production agreements
+ 2-3 Sports representation contracts
+ 1-2 Service agreements with entertainment clients
+Client Database (15 clients):
+ Mix of music artists, film production, sports, corporate
+ Include: name, industry, deal history, notes
+Due Diligence Checklist:
+ Eric Sacks' actual checklist (if available) OR
+ Standard transactional law due diligence checklist (10 categories)
+
+4. Demo Scenarios
+4.1 Scenario 1: Draft NDA for New Music Client (10 minutes)
+Setup:
+ User: Grubman attorney
+ Client: New recording artist (similar to existing clients)
+ Task: Need NDA before discussing representation
+Demo Flow:
+ Attorney opens "Draft Contract" tab
+ Selects template: "Mutual NDA"
+ Enters client info: 
+ Name: "Jordan Rivera"
+ Industry: "Music Artist"
+ Scope: "Representation discussions"
+ System searches firm history (5 seconds)
+ Shows: "Found 3 similar agreements: Drake, Beyoncé, Kendrick Lamar"
+ Generates draft in 15 seconds
+ Draft appears with highlights: 
+ Green: Standard clauses (95%)
+ Yellow: Music-specific clauses (4%)
+ Red: Fill in dates/details (1%)
+ Attorney makes 2 minor edits
+ Downloads PDF
+Key Message: "What used to take 45 minutes now takes 5 minutes. Every approved edit makes the system smarter for the whole firm."
+4.2 Scenario 2: Due Diligence Review (15 minutes)
+Setup:
+ User: Eric Sacks (or attorney on his team)
+ Document: 45-page vendor services agreement
+ Task: Quick due diligence before client meeting
+Demo Flow:
+ Attorney opens "Review Contract" tab
+ Uploads vendor agreement PDF
+ System analyzes for 90 seconds (shows progress bar)
+ Results appear: 
+ Overall Risk Score: 0.67 (HIGH)
+ Checklist Dashboard: 7/10 green, 2 yellow, 1 red
+ Top 3 Concerns: 
+ Unlimited Liability (Section 7.2) - CRITICAL
+ One-Sided Termination (Section 10.1) - HIGH
+ 60-Day Payment Terms (Section 3.4) - MEDIUM
+ Attorney clicks "Critical Issue #1" to see: 
+ Exact contract language
+ Why it's problematic
+ Market standard alternative
+ Suggested redline
+ Attorney generates full PDF report (30 seconds)
+ Downloads report for client
+Key Message: "What used to take 3 hours now takes 5 minutes. Nothing gets missed - Eric's checklist is automated. You can focus on strategy, not searching for needles in 45-page haystacks."
+
+5. Competitive Differentiation
+5.1 vs. NetDocs AI
+Our Advantages:
+ Standalone system (not tied to NetDocs) (Will be integrated)
+ Firm-specific learning (gets smarter with every use)
+ Customizable checklist (Eric Sacks' actual process)
+Demo Message: "NetDocs is great for document management, but it doesn't learn YOUR firm's preferences. We do." - Compliments and get more value from NetDocs investment
+5.2 vs. Spellbook AI
+Our Advantages:
+ Works with any format (not limited to Word) (Start with txt, pdf, docx)
+ Integrates firm history (Spellbook doesn't)
+ Customizable due diligence (Spellbook is generic)
+Demo Message: "Spellbook is impressive for general drafting, but it doesn't know Grubman. We learn from every contract you've ever done."
+5.3 vs. Harvey AI
+Our Advantages:
+ Built for transactional law (Harvey is litigation-focused)
+ Faster drafting (Harvey is research-heavy)
+ Client history integration (Harvey doesn't have this)
+Demo Message: "Harvey is excellent for research and litigation. We're built specifically for what YOU do: transactional work and due diligence."
+6. Implementation Phases
+6.1 4-Day Sprint Breakdown
+Day 1: Setup & Foundation
+ Clone ContractIQ from GitHub
+ Install dependencies
+ Setup OpenAI API
+ Create 3 Grubman templates
+ Build sample firm history (10 contracts)
+ Customize UI branding
+Day 2: Contract Drafting Feature
+ Implement template selection
+ Build firm history search
+ Create draft generation flow
+ Add highlighting system
+ Test with 3 scenarios
+Day 3: Due Diligence Feature
+ Implement Eric Sacks' checklist
+ Build automated analysis
+ Create risk scoring
+ Generate PDF reports
+ Test with 3 contracts
+Day 4: Polish & Practice
+ UI polish (progress bars, animations)
+ Add sample contracts (quick demo)
+ Practice 30-minute demo 3x
+ Record backup video
+ Deploy to Streamlit Cloud (backup)
+6.2 What Gets Deferred to Phase 2
+Advanced Features (Not for Demo):
+ NetDocs API integration
+ Advanced semantic search with vector embeddings
+ Numeric risk scoring (0.0-1.0 scale)
+ Visual dashboards and charts
+ Market standard comparisons (requires market data)
+ Advanced conflict detection across all contracts
+ Clause provenance tracking ("from Drake NDA")
+ Learning from approved edits
+ Professional PDF export with formatting
+ Patent-protected features: 
+ Parallel processing algorithms
+ Statistical confidence bounds
+ Cryptographic audit trails
+ Minimax optimization
+ Multi-agent orchestration
+Why Phase 2: These features are impressive but add weeks of development time and complexity that isn't necessary to prove core value in a 30-minute demo.
+
+7. Success Metrics
+7.1 Demo Day Success (Must Achieve)
+ ? Demo runs without errors
+ ? Both scenarios complete successfully
+ ? Response times < 30 seconds (draft generation)
+ ? Response times < 2 minutes (due diligence analysis)
+ ? Larry Shire says "impressive" or "interesting"
+ ? Grubman requests follow-up meeting
+7.2 Technical Validation (Before Demo)
+ ? 10 test runs with no crashes
+ ? All 3 templates generate correctly
+ ? Firm history search returns relevant results
+ ? Due diligence identifies 90%+ of critical issues
+ ? PDF reports generate correctly
+ ? UI is professional and polished
+
+8. Risks & Mitigation
+8.1 Technical Risks
+RiskImpactMitigationNo Eric Sacks checklist by Day 2HIGHUse standard transactional DD checklistNo sample Grubman contractsHIGHCreate synthetic but realistic contractsOpenAI API failure during demoHIGHPre-cache results, have mock responsesWiFi failure at demo locationMEDIUMRun locally (no WiFi needed), mobile hotspot backupSlow performance (>30 sec)MEDIUMOptimize code, pre-warm system, use shorter test docs8.2 Business Risks
+RiskImpactMitigation"Just another AI tool" perceptionHIGHEmphasize firm-specific learning, show time savings with numbers"Too complex to implement" concernMEDIUMEmphasize "We handle all setup", show Day 1 valuePrefer competitorMEDIUMPosition as complementary, not replacementBudget concernsLOWShow ROI (lawyer time saved), offer pilot
+9. Deliverables
+9.1 For Demo Day (October 18) Need working by then demo is first week of November
+ Working Application
+ Streamlit web app running locally
+ Contract drafting module (Tab 1)
+ Due diligence review module (Tab 2)
+ Grubman branding (logo, colors) or Airiam????
+ Sample Data Loaded
+ 3 contract templates
+ 10 firm history documents
+ 15 client profiles
+ Eric Sacks' due diligence checklist
+ Demo Materials
+ 30-minute demo script
+ Two prepared scenarios
+ Talking points document
+ Competitive differentiation slides
+ Backup Materials
+ Pre-recorded demo video (if live demo fails)
+ PDF of sample outputs
+ One-page handout for Larry Shire
+9.2 Post-Demo Documentation
+ Technical architecture document
+ User guide (for Grubman attorneys)
+ Phase 2 roadmap (NetDocs integration, etc.)
+ Pricing proposal
+
+10. Open Questions for Client
+URGENT - Need answers by October 15:
+ Eric Sacks' Checklist
+ Do you have Eric Sacks' actual due diligence checklist?
+ If yes, can you share by end of day?
+ If no, can we use standard transactional DD checklist?
+ Sample Contracts
+ Can you provide 2-3 sample Grubman contracts (redacted)?
+ If not, we'll create realistic synthetic versions
+ What industries should we focus on? (music, film, sports?)
+ Branding Assets
+ Do you have logo files (PNG/SVG)?
+ What are official brand colors?
+ If not available, we'll use placeholder
+ Demo Logistics
+ Confirmed date/time: October 18, 2025?
+ Who will attend besides Larry Shire?
+ Will this be in-person or virtual?
+ Do you have reliable WiFi at location?
+ Scope Confirmation
+ Are the two use cases (drafting + DD) sufficient for demo?
+ Any other features Larry Shire specifically wants to see?
+ Is 30-minute demo the right duration?
+
+11. Approval & Next Steps
+11.1 Approval Checklist
+Please confirm:
+ [ ] Scope is appropriate (2 use cases, no Phase 2 features)
+ [ ] 4-day timeline is acceptable
+ [ ] Demo scenarios match your needs
+ [ ] Success criteria are clear
+ [ ] You will provide Eric Sacks' checklist (or approve standard)
+ [ ] You will provide sample contracts (or approve synthetic)
+11.2 Next Steps Upon Approval
+ Immediate (Today):
+ Obtain Eric Sacks' checklist
+ Get sample contracts or approval to create synthetic
+ Get branding assets or approval for placeholders
+ Tomorrow (October 15):
+ Create detailed Design Document
+ Identify exact GitHub repos to use
+ Define step-by-step implementation guide
+ October 15-17:
+ Execute 4-day sprint
+ Daily check-ins on progress
+ October 18:
+ Final walkthrough internally
+ Demo with Larry Shire first week of November
+
+12. Document Control
+Prepared By: AI Development Team
+Date: October 14, 2025
+Version: 1.0 (Simplified)
+Reviews Required:
+ [ ] Project Sponsor
+ [ ] Technical Lead
+ [ ] Grubman Point of Contact (Larry Shire's team)
+Next Document: Design Document (upon approval of requirements)
+
+Appendix A: Why This Scope is Achievable in 4 Days
+What we're NOT building in Phase 1 (saves 2+ weeks):
+ ? Vector database / semantic search (simple keyword matching is fine)
+ ? Numeric risk scoring algorithms (0.0-1.0) - just flag Critical/High/Medium
+ ? Visual dashboards with charts (text-based reports are fine)
+ ? Advanced highlighting systems (green/yellow/red) - basic sections are fine
+ ? Clause provenance tracking - not needed for demo
+ ? Multi-agent orchestration (unnecessary complexity)
+ ? Patent-protected algorithms (Phase 2)
+ ? NetDocs integration (Phase 2)
+ ? Custom LLM fine-tuning (use GPT-4 or other LLM as-is)
+ ? Professional PDF generation with formatting (simple text/DOCX is fine)
+ ? Market comparison data (requires external data sources)
+What we ARE building (minimal viable demo):
+ ? Simple Streamlit UI with 2 tabs (We made use other framework after testing)
+ ? Template-based contract generation with GPT-4 or other simple LLM
+ ? Basic firm history matching (keyword/industry)
+ ? Checklist-based due diligence review
+ ? Critical issue flagging (pattern matching)
+ ? Basic text report output
+ ? Professional appearance and branding
+Realistic Timeline:
+ Day 1: Setup + Template Creation + Basic UI (6-8 hours)
+ Day 2: Contract Drafting (simple GPT-4 prompts) (8 hours)
+ Day 3: Due Diligence (pattern matching + GPT-4) (8 hours)
+ Day 4: Polish + Practice (6-8 hours)
+ Total: 28-32 hours of focused work
+This is DOABLE because:
+ We're building from scratch with simple architecture (no complex dependencies)
+ Using only proven, simple technologies (Streamlit + GPT-4 + basic Python)
+ Scope is limited to 2 use cases with simplified features
+ No integration with external systems
+ No vector databases or semantic search complexity
+ Demo quality, not production quality
+ Leveraging GPT-4's  or other LLM intelligence instead of building complex algorithms
+
