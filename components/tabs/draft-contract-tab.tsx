@@ -10,13 +10,32 @@ import {
   ManagementAgreementTemplate,
   FormProducerAgreementTemplate,
   TEMPLATE_TYPES
-} from "@/templates"
+} from "@/templates-components"
 import { 
   FIRM_HISTORY, 
   DEMO_SCENARIOS, 
   LOADING_STAGES,
   type FirmHistoryContract 
 } from "@/lib/demo-data"
+
+// Helper function to get template content as string
+const getTemplateContent = (templateType: string, variables: any): string => {
+  // Create a temporary component instance to extract the templateContent
+  let templateComponent;
+  if (templateType === TEMPLATE_TYPES.PRODUCER_AGREEMENT) {
+    templateComponent = ProducerAgreementTemplate({ variables });
+  } else if (templateType === TEMPLATE_TYPES.MANAGEMENT_AGREEMENT) {
+    templateComponent = ManagementAgreementTemplate({ variables });
+  } else if (templateType === TEMPLATE_TYPES.FORM_PRODUCER_AGREEMENT) {
+    templateComponent = FormProducerAgreementTemplate({ variables });
+  } else {
+    return "";
+  }
+  
+  // The template components return the templateContent string
+  // We need to extract it from the component
+  return templateComponent as any;
+};
 
 export default function DraftContractTab() {
   const [isLoading, setIsLoading] = useState(false)
@@ -56,81 +75,38 @@ export default function DraftContractTab() {
       })
 
       // Generate template based on selected type with form data
-      let templateContent = ""
-
-      if (formData.templateType === TEMPLATE_TYPES.PRODUCER_AGREEMENT) {
-        templateContent = ProducerAgreementTemplate({
-          variables: {
-            artist: formData.artist || "Taylor Martinez",
-            producer: formData.producer || "Taylor Martinez Productions",
-            company: formData.company || "Republic Records",
-            companyAddress: formData.companyAddress || "1755 Broadway, New York, NY 10019",
-            companyContact: formData.companyContact || "John Smith",
-            companyEmail: formData.companyEmail || "contracts@republicrecords.com",
-            companyPhone: formData.companyPhone || "(212) 555-0123",
-            producerAddress: formData.producerAddress || "123 Music Row, Nashville, TN 37203",
-            producerContact: formData.producerContact || "Taylor Martinez",
-            producerEmail: formData.producerEmail || "taylor@martinproductions.com",
-            producerPhone: formData.producerPhone || "(615) 555-0456",
-            compositionTitle: formData.compositionTitle || "New Hit Single",
-            advance: formData.advance || "$25,000",
-            royaltyRate: formData.royaltyRate || "3%",
-            date: new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })
-          }
+      const variables = {
+        artist: formData.artistName || "Taylor Martinez",
+        producer: formData.producerName || "Taylor Martinez Productions",
+        company: formData.producerCompany || "Republic Records",
+        companyAddress: formData.producerAddress || "1755 Broadway, New York, NY 10019",
+        companyContact: formData.companyContact || "John Smith",
+        companyTitle: formData.companyTitle || "President",
+        companyEmail: formData.producerEmail || "contracts@republicrecords.com",
+        companyPhone: formData.producerPhone || "(212) 555-0123",
+        producerAddress: formData.producerAddress || "123 Music Row, Nashville, TN 37203",
+        producerContact: formData.producerName || "Taylor Martinez",
+        producerTitle: formData.producerTitle || "Producer",
+        producerEmail: formData.producerEmail || "taylor@martinproductions.com",
+        producerPhone: formData.producerPhone || "(615) 555-0456",
+        compositionTitle: formData.contractTitle || "New Hit Single",
+        advance: formData.advanceAmount || "$25,000",
+        royaltyRate: formData.royaltyRate || "3%",
+        commissionRate: formData.commissionRate || "20%",
+        artistAddress: formData.artistAddress || "456 Artist Street, Nashville, TN 37203",
+        artistEmail: formData.artistEmail || "taylor@artist.com",
+        artistPhone: formData.artistPhone || "(615) 555-0123",
+        termYears: formData.termYears || "4",
+        territory: formData.territory || "Worldwide",
+        governingLaw: formData.governingLaw || "California",
+        date: formData.effectiveDate || new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
         })
-      } else if (formData.templateType === TEMPLATE_TYPES.MANAGEMENT_AGREEMENT) {
-        templateContent = ManagementAgreementTemplate({
-          variables: {
-            artist: formData.artist || "Taylor Martinez",
-            producer: formData.producer || "Management Company",
-            producerAddress: formData.producerAddress || "123 Management Ave, Los Angeles, CA 90210",
-            producerContact: formData.producerContact || "Manager Name",
-            producerEmail: formData.producerEmail || "manager@management.com",
-            producerPhone: formData.producerPhone || "(323) 555-0789",
-            artistAddress: formData.artistAddress || "456 Artist Street, Nashville, TN 37203",
-            artistContact: formData.artistContact || "Taylor Martinez",
-            artistEmail: formData.artistEmail || "taylor@artist.com",
-            artistPhone: formData.artistPhone || "(615) 555-0123",
-            commissionRate: formData.commissionRate || "20%",
-            termYears: formData.termYears || "4",
-            date: new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })
-          }
-        })
-      } else if (formData.templateType === TEMPLATE_TYPES.FORM_PRODUCER_AGREEMENT) {
-        templateContent = FormProducerAgreementTemplate({
-          variables: {
-            artist: formData.artist || "Taylor Martinez",
-            producer: formData.producer || "Taylor Martinez Productions",
-            company: formData.company || "Republic Records",
-            companyAddress: formData.companyAddress || "1755 Broadway, New York, NY 10019",
-            companyContact: formData.companyContact || "John Smith",
-            companyEmail: formData.companyEmail || "contracts@republicrecords.com",
-            companyPhone: formData.companyPhone || "(212) 555-0123",
-            producerAddress: formData.producerAddress || "123 Music Row, Nashville, TN 37203",
-            producerContact: formData.producerContact || "Taylor Martinez",
-            producerEmail: formData.producerEmail || "taylor@martinproductions.com",
-            producerPhone: formData.producerPhone || "(615) 555-0456",
-            compositionTitle: formData.compositionTitle || "New Hit Single",
-            advance: formData.advance || "$25,000",
-            royaltyRate: formData.royaltyRate || "3%",
-            date: new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })
-          }
-        })
-      } else {
-        throw new Error("Invalid template type selected")
       }
+
+      const templateContent = getTemplateContent(formData.templateType, variables)
 
       // Log the generated template content
       console.log('Generated template content:', templateContent.substring(0, 200) + '...')
@@ -143,7 +119,9 @@ export default function DraftContractTab() {
           client: contract.client_name,
           type: contract.contract_type.replace('_', ' ').toUpperCase(),
           match_reason: `Similar ${contract.client_industry} agreement from ${contract.date_created}`
-        }))
+        })),
+        id: `contract_${Date.now()}`,
+        format: 'markdown'
       }
 
       setResult(mockResult)

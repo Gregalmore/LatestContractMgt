@@ -12,16 +12,24 @@ export const ProducerAgreementTemplate: React.FC<ProducerAgreementTemplateProps>
     company,
     companyAddress,
     companyContact,
+    companyTitle,
     companyEmail,
     companyPhone,
     producerAddress,
     producerContact,
+    producerTitle,
     producerEmail,
     producerPhone,
     compositionTitle,
     advance,
     royaltyRate,
-    date
+    date,
+    artistAddress,
+    artistEmail,
+    artistPhone,
+    termYears,
+    territory,
+    governingLaw
   } = variables;
 
   const templateContent = `# PRODUCER AGREEMENT
@@ -46,11 +54,11 @@ export const ProducerAgreementTemplate: React.FC<ProducerAgreementTemplateProps>
 
 ## 1. DEFINITIONS
 
-**1.1 "Artist"** means ${artist}.
+**1.1 "Artist"** means ${artist}, with address at ${artistAddress || 'To be provided'}.
 
 **1.2 "Company"** means ${company}, with offices at ${companyAddress}.
 
-**1.3 "Producer"** means ${producer}.
+**1.3 "Producer"** means ${producer}, with address at ${producerAddress || 'To be provided'}.
 
 **1.4 "Master(s)"** means the master recording(s) embodying Artist's performance of the musical composition(s) listed in Schedule A attached hereto.
 
@@ -99,13 +107,13 @@ Each party shall indemnify, defend, and hold harmless the other party from and a
 
 ## 8. TERM AND TERMINATION
 
-**8.1 Term.** This Agreement shall commence on the date hereof and shall continue until all obligations hereunder have been fulfilled.
+**8.1 Term.** This Agreement shall commence on the date hereof and shall continue for a period of ${termYears || '4'} years, unless terminated earlier in accordance with the provisions hereof.
 
 **8.2 Termination.** Either party may terminate this Agreement upon written notice if the other party materially breaches any provision hereof and fails to cure such breach within thirty (30) days after written notice thereof.
 
 ## 9. GENERAL PROVISIONS
 
-**9.1 Governing Law.** This Agreement shall be governed by and construed in accordance with the laws of the State of California.
+**9.1 Governing Law.** This Agreement shall be governed by and construed in accordance with the laws of the State of ${governingLaw || 'California'}.
 
 **9.2 Entire Agreement.** This Agreement constitutes the entire agreement between the parties and supersedes all prior negotiations, representations, or agreements relating to the subject matter hereof.
 
@@ -115,16 +123,16 @@ Each party shall indemnify, defend, and hold harmless the other party from and a
 
 **9.5 Notices.** All notices required hereunder shall be in writing and shall be delivered to the addresses set forth below.
 
-${LegalDocumentFooter()}
+${LegalDocumentFooter(variables)}
 
 ---
 
 ## SCHEDULE A
 **Master Recordings and Compositions**
 
-| Composition Title | Artist | Producer Credit |
-|-------------------|--------|-----------------|
-| ${compositionTitle} | ${artist} | Produced by ${producer} |
+- **Composition Title:** ${compositionTitle}
+- **Artist:** ${artist}
+- **Producer Credit:** Produced by ${producer}
 
 ## SCHEDULE B
 **Producer Royalty Provisions**
@@ -159,17 +167,17 @@ ${producerAddress || 'To be provided'}
 
 **COMPANY:**
 
-By: ______________________________
-Title: ___________________________
+By: ${companyContact || '_____________________________'}
+Title: ${companyTitle || '___________________________'}
 
 **PRODUCER/MANAGER:**
 
-By: ______________________________
-Title: ___________________________
+By: ${producerContact || '_____________________________'}
+Title: ${producerTitle || '___________________________'}
 
 ---
 
-*This agreement is governed by the laws of the State of California and any disputes shall be resolved through binding arbitration.*`;
+*This agreement is governed by the laws of the State of ${governingLaw || 'California'} and any disputes shall be resolved through binding arbitration.*`;
 
   return templateContent;
 };

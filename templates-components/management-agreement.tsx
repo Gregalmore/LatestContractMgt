@@ -9,8 +9,15 @@ export const ManagementAgreementTemplate: React.FC<ManagementAgreementTemplatePr
   const {
     artist,
     producer: manager,
+    company,
+    companyAddress,
+    companyContact,
+    companyTitle,
+    companyEmail,
+    companyPhone,
     producerAddress: managerAddress,
     producerContact: managerContact,
+    producerTitle: managerTitle,
     producerEmail: managerEmail,
     producerPhone: managerPhone,
     artistAddress,
@@ -153,7 +160,7 @@ export const ManagementAgreementTemplate: React.FC<ManagementAgreementTemplatePr
 
 **17.4 Governing Law.** This Agreement shall be governed by and construed in accordance with the laws of the State of California applicable to contracts entered in and performed entirely within the State of California without giving any effect to the choice of law principles in the State of California. The parties hereby submit to the jurisdiction of the courts of the State of California.
 
-${LegalDocumentFooter()}
+${LegalDocumentFooter(variables)}
 
 ---
 

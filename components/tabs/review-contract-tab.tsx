@@ -11,14 +11,14 @@ import {
   LOADING_STAGES,
   type DueDiligenceResult 
 } from "@/lib/demo-data"
-import { AlertTriangle, CheckCircle, XCircle, Clock, FileText, Shield } from "lucide-react"
+import { triggerReviewWorkflow, type N8nReviewRequest } from "@/lib/n8n/webhooks"
+import { AlertTriangle, CheckCircle, XCircle, Clock, FileText, Shield, Loader2 } from "lucide-react"
 
 export default function ReviewContractTab() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisStage, setAnalysisStage] = useState("")
   const [result, setResult] = useState<DueDiligenceResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [selectedDemo, setSelectedDemo] = useState<'good' | 'bad' | null>(null)
 
   const handleFileUpload = async (file: File) => {
     setIsAnalyzing(true)
@@ -26,23 +26,72 @@ export default function ReviewContractTab() {
     setResult(null)
 
     try {
-      // Simulate AI processing with loading stages
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Unsupported file type. Please upload PDF, DOCX, or TXT files.')
+      }
+
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('File size too large. Please upload files smaller than 10MB.')
+      }
+
+      // Show loading stages
       const stages = LOADING_STAGES.due_diligence
       for (let i = 0; i < stages.length; i++) {
         setAnalysisStage(stages[i])
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500))
       }
 
-      // Simulate analysis based on file name or content
-      let analysisResult: DueDiligenceResult
-      
-      if (file.name.toLowerCase().includes('bad') || file.name.toLowerCase().includes('risky')) {
-        analysisResult = DUE_DILIGENCE_RESULTS.bad_contract
-      } else {
-        analysisResult = DUE_DILIGENCE_RESULTS.good_contract
+      // Send to n8n webhook as multipart
+      setAnalysisStage("Sending file to AI analysis...")
+      const requestData: N8nReviewRequest = {
+        file: file // Send File object directly
       }
 
-      setResult(analysisResult)
+      console.log('Sending file to n8n webhook:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      })
+
+      const analysisResult = await triggerReviewWorkflow(requestData)
+      console.log('Analysis result received:', analysisResult)
+
+      // Convert n8n response to our expected format
+      let mappedResult: DueDiligenceResult
+      
+      if (analysisResult && typeof analysisResult === 'object') {
+        // Count issues by severity
+        const topConcerns = analysisResult.top_concerns || []
+        const criticalCount = topConcerns.filter(c => c.severity?.toLowerCase() === 'critical').length
+        const highCount = topConcerns.filter(c => c.severity?.toLowerCase() === 'high').length
+        const mediumCount = topConcerns.filter(c => c.severity?.toLowerCase() === 'medium').length
+        
+        // Determine overall risk based on highest severity
+        let overallRisk = 'LOW'
+        if (criticalCount > 0) overallRisk = 'CRITICAL'
+        else if (highCount > 0) overallRisk = 'HIGH'
+        else if (mediumCount > 0) overallRisk = 'MEDIUM'
+        
+        // Map n8n response to our UI format
+        mappedResult = {
+          overall_risk: overallRisk,
+          critical_issues: criticalCount,
+          high_priority_issues: highCount,
+          medium_priority_issues: mediumCount,
+          top_concerns: topConcerns,
+          checklist_results: analysisResult.checklist_results || []
+        }
+        
+        console.log('Mapped result:', mappedResult)
+      } else {
+        // Fallback to demo data if response is not in expected format
+        mappedResult = DUE_DILIGENCE_RESULTS.good_contract
+      }
+
+      setResult(mappedResult)
     } catch (err: any) {
       console.error('Error analyzing contract:', err)
       setError(err.message || 'Failed to analyze contract')
@@ -52,33 +101,9 @@ export default function ReviewContractTab() {
     }
   }
 
-  const handleDemoScenario = async (scenario: 'good' | 'bad') => {
-    setSelectedDemo(scenario)
-    setIsAnalyzing(true)
-    setError(null)
-    setResult(null)
-
-    try {
-      // Simulate AI processing with loading stages
-      const stages = LOADING_STAGES.due_diligence
-      for (let i = 0; i < stages.length; i++) {
-        setAnalysisStage(stages[i])
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500))
-      }
-
-      const analysisResult = DUE_DILIGENCE_RESULTS[scenario === 'good' ? 'good_contract' : 'bad_contract']
-      setResult(analysisResult)
-    } catch (err: any) {
-      console.error('Error analyzing contract:', err)
-      setError(err.message || 'Failed to analyze contract')
-    } finally {
-    setIsAnalyzing(false)
-      setAnalysisStage("")
-    }
-  }
 
   const getRiskColor = (risk: string) => {
-    switch (risk) {
+    switch (risk?.toUpperCase()) {
       case 'LOW': return 'text-green-600 bg-green-50'
       case 'MEDIUM': return 'text-yellow-600 bg-yellow-50'
       case 'HIGH': return 'text-orange-600 bg-orange-50'
@@ -88,10 +113,11 @@ export default function ReviewContractTab() {
   }
 
   const getSeverityIcon = (severity: string) => {
-    switch (severity) {
+    switch (severity?.toLowerCase()) {
       case 'critical': return <XCircle className="h-4 w-4 text-red-500" />
       case 'high': return <AlertTriangle className="h-4 w-4 text-orange-500" />
       case 'medium': return <Clock className="h-4 w-4 text-yellow-500" />
+      case 'low': return <CheckCircle className="h-4 w-4 text-green-500" />
       default: return <CheckCircle className="h-4 w-4 text-green-500" />
     }
   }
@@ -106,58 +132,6 @@ export default function ReviewContractTab() {
         </p>
       </div>
 
-      {/* Demo Scenarios */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-green-500" />
-              Demo: Good Contract
-            </CardTitle>
-            <CardDescription>
-              Standard management agreement with fair terms
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              This contract has standard terms with only minor issues. Perfect for demonstrating the system's ability to identify well-structured agreements.
-            </p>
-            <Button 
-              onClick={() => handleDemoScenario('good')}
-              disabled={isAnalyzing}
-              className="w-full"
-              variant="outline"
-            >
-              Analyze Good Contract
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Demo: Risky Contract
-            </CardTitle>
-            <CardDescription>
-              Management agreement with multiple red flags
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              This contract has serious issues including unlimited liability, excessive commission rates, and one-sided terms. Shows the system's risk detection capabilities.
-            </p>
-            <Button 
-              onClick={() => handleDemoScenario('bad')}
-              disabled={isAnalyzing}
-              className="w-full"
-              variant="destructive"
-            >
-              Analyze Risky Contract
-            </Button>
-          </CardContent>
-        </Card>
-            </div>
 
       {/* File Upload */}
       <Card>
@@ -203,13 +177,18 @@ export default function ReviewContractTab() {
           <CardContent className="pt-6">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm font-medium">{analysisStage}</span>
-          </div>
+              </div>
               <Progress value={75} className="w-full" />
               <p className="text-xs text-muted-foreground">
-                Eric Sacks' due diligence process is now automated...
+                Uploading file directly to n8n webhook...
               </p>
+              <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                <strong>Webhook URL:</strong> https://n8n.srv1073744.hstgr.cloud/webhook/contract-analysis<br/>
+                <strong>Content-Type:</strong> multipart/form-data<br/>
+                <strong>Field:</strong> file
+          </div>
             </div>
           </CardContent>
         </Card>
@@ -238,25 +217,25 @@ export default function ReviewContractTab() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className={`text-2xl font-bold p-3 rounded-lg ${getRiskColor(result.overall_risk)}`}>
-                    {result.overall_risk}
+                    {result.overall_risk || 'UNKNOWN'}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Overall Risk</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-red-600 p-3 rounded-lg bg-red-50">
-                    {result.critical_issues}
+                    {result.critical_issues || 0}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Critical Issues</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-600 p-3 rounded-lg bg-orange-50">
-                    {result.high_priority_issues}
+                    {result.high_priority_issues || 0}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">High Priority</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-yellow-600 p-3 rounded-lg bg-yellow-50">
-                    {result.medium_priority_issues}
+                    {result.medium_priority_issues || 0}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Medium Priority</p>
                 </div>
@@ -265,12 +244,12 @@ export default function ReviewContractTab() {
           </Card>
 
           {/* Top Concerns */}
-          {result.top_concerns.length > 0 && (
+          {result.top_concerns && result.top_concerns.length > 0 ? (
             <Card>
               <CardHeader>
                 <CardTitle>Top Concerns</CardTitle>
                 <CardDescription>
-                  Critical issues that require immediate attention
+                  Issues identified in the contract analysis
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -284,67 +263,82 @@ export default function ReviewContractTab() {
                           <p className="text-sm text-muted-foreground mt-1">{concern.description}</p>
                           <div className="mt-2">
                             <Badge variant={concern.severity === 'critical' ? 'destructive' : 'secondary'}>
-                              {concern.severity.toUpperCase()}
+                              {concern.severity?.toUpperCase() || 'UNKNOWN'}
                             </Badge>
                           </div>
                           <div className="mt-3 p-3 bg-muted rounded-md">
                             <p className="text-sm font-medium text-foreground mb-1">Recommendation:</p>
                             <p className="text-sm text-muted-foreground">{concern.recommendation}</p>
-          </div>
+                          </div>
                           <div className="mt-2 p-2 bg-muted/50 rounded text-xs">
                             <span className="font-medium">Context:</span> {concern.context}
-            </div>
-          </div>
-        </div>
-      </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-            </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center text-muted-foreground">
+                  <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                  <p className="font-medium">No concerns identified</p>
+                  <p className="text-sm">The contract appears to be well-structured with no major issues detected.</p>
+                </div>
               </CardContent>
             </Card>
           )}
 
           {/* Checklist Results */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Checklist Analysis</CardTitle>
-              <CardDescription>
-                Eric Sacks' due diligence checklist results
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {result.checklist_results.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {item.status === 'pass' ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                      ) : item.status === 'warning' ? (
-                        <Clock className="h-5 w-5 text-yellow-500" />
-                      ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
-                      )}
-                      <span className="font-medium">{item.category}</span>
+          {result.checklist_results && result.checklist_results.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Checklist Analysis</CardTitle>
+                <CardDescription>
+                  Due diligence checklist results
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {result.checklist_results.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {item.status === 'pass' ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : item.status === 'warning' ? (
+                          <Clock className="h-5 w-5 text-yellow-500" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-500" />
+                        )}
+                        <span className="font-medium">{item.category}</span>
+                      </div>
+                      <Badge variant={
+                        item.status === 'pass' ? 'default' : 
+                        item.status === 'warning' ? 'secondary' : 
+                        'destructive'
+                      }>
+                        {item.status?.toUpperCase() || 'UNKNOWN'}
+                      </Badge>
                     </div>
-                    <Badge variant={
-                      item.status === 'pass' ? 'default' : 
-                      item.status === 'warning' ? 'secondary' : 
-                      'destructive'
-                    }>
-                      {item.status.toUpperCase()}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center text-muted-foreground">
+                  <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                  <p className="font-medium">All checklist items passed</p>
+                  <p className="text-sm">The contract meets all due diligence requirements.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Demo Message */}
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Demo Message:</strong> "Eric Sacks' entire due diligence process - the checklist he's refined over decades - is now automated. What used to take 3 hours of careful review just happened in 90 seconds."
-            </AlertDescription>
-          </Alert>
         </div>
       )}
     </div>

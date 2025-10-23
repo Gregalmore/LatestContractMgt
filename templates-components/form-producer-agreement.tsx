@@ -12,10 +12,12 @@ export const FormProducerAgreementTemplate: React.FC<FormProducerAgreementTempla
     company,
     companyAddress,
     companyContact,
+    companyTitle,
     companyEmail,
     companyPhone,
     producerAddress,
     producerContact,
+    producerTitle,
     producerEmail,
     producerPhone,
     compositionTitle,
@@ -115,7 +117,7 @@ Each party shall indemnify, defend, and hold harmless the other party from and a
 
 **9.5 Notices.** All notices required hereunder shall be in writing and shall be delivered to the addresses set forth below.
 
-${LegalDocumentFooter()}
+${LegalDocumentFooter(variables)}
 
 ---
 
@@ -139,9 +141,9 @@ __________________________________________
 ## SCHEDULE A
 **Master Recordings and Compositions**
 
-| Composition Title | Artist | Producer Credit |
-|-------------------|--------|-----------------|
-| ${compositionTitle} | ${artist} | Produced by ${producer} |
+- **Composition Title:** ${compositionTitle}
+- **Artist:** ${artist}
+- **Producer Credit:** Produced by ${producer}
 
 ## SCHEDULE B
 **Producer Royalty Provisions**

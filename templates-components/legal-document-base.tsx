@@ -6,6 +6,7 @@ export interface LegalDocumentVariables {
   company: string;
   companyAddress: string;
   companyContact: string;
+  companyTitle?: string;
   companyEmail: string;
   companyPhone: string;
   
@@ -20,6 +21,7 @@ export interface LegalDocumentVariables {
   producer: string;
   producerAddress?: string;
   producerContact?: string;
+  producerTitle?: string;
   producerEmail?: string;
   producerPhone?: string;
   
@@ -28,6 +30,10 @@ export interface LegalDocumentVariables {
   royaltyRate?: string;
   commissionRate?: string;
   termYears?: string;
+  
+  // Legal terms
+  territory?: string;
+  governingLaw?: string;
   
   // Project details
   compositionTitle?: string;
@@ -57,20 +63,20 @@ export const LegalDocumentHeader = ({ title, date }: { title: string; date: stri
 
 `;
 
-export const LegalDocumentFooter = () => `
+export const LegalDocumentFooter = (variables?: LegalDocumentVariables) => `
 ---
 
 **IN WITNESS WHEREOF**, the parties have executed this Agreement as of the date first above written.
 
 **COMPANY:**
 
-By: ______________________________
-Title: ___________________________
+By: ${variables?.companyContact || '_____________________________'}
+Title: ${variables?.companyTitle || '___________________________'}
 
 **PRODUCER/MANAGER:**
 
-By: ______________________________
-Title: ___________________________
+By: ${variables?.producerContact || '_____________________________'}
+Title: ${variables?.producerTitle || '___________________________'}
 
 ---
 
