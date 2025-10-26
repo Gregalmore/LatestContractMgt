@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from "docx"
 import RichTextEditor from "./rich-text-editor"
 
 interface ContractEditorProps {
@@ -20,144 +21,172 @@ export default function ContractEditor({ contract, onReset }: ContractEditorProp
     navigator.clipboard.writeText(editedContent)
   }
 
-  const handleDownload = () => {
-    // Create a proper DOCX file using a different approach
-    // We'll create an HTML file with proper styling that can be opened in Word
-    const htmlContent = createStyledHtml(editedContent)
-    
-    const element = document.createElement("a")
-    const file = new Blob([htmlContent], { 
+  const handleDownload = async () => {
+    try {
+      // Parse the content and create DOCX document
+      const doc = createDocxDocument(editedContent)
+      
+      // Generate the DOCX file
+      const buffer = await Packer.toBuffer(doc)
+      
+      // Create blob and download
+      const blob = new Blob([buffer], { 
       type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
     })
-    element.href = URL.createObjectURL(file)
-    element.download = "contract.docx"
+      
+      const element = document.createElement("a")
+      const url = URL.createObjectURL(blob)
+      element.href = url
+      element.download = `contract-${new Date().toISOString().split('T')[0]}.docx`
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
+      
+      // Clean up the URL object
+      setTimeout(() => URL.revokeObjectURL(url), 100)
+    } catch (error) {
+      console.error("Error generating DOCX:", error)
+      alert("Error generating DOCX file. Please try again.")
+    }
   }
 
-  // Helper function to create styled HTML that can be opened in Word
-  const createStyledHtml = (content: string) => {
-    const htmlContent = convertMarkdownToHtml(content)
+  // Helper function to create DOCX document from markdown content
+  const createDocxDocument = (content: string) => {
+    const paragraphs = parseMarkdownToDocx(content)
     
-    return `<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-  <meta charset="utf-8">
-  <meta name="ProgId" content="Word.Document">
-  <meta name="Generator" content="Microsoft Word 15">
-  <meta name="Originator" content="Microsoft Word 15">
-  <style>
-    body {
-      font-family: 'Times New Roman', serif;
-      line-height: 1.6;
-      margin: 1in;
-      color: #000;
-    }
-    h1 {
-      font-size: 18pt;
-      font-weight: bold;
-      margin-top: 12pt;
-      margin-bottom: 6pt;
-    }
-    h2 {
-      font-size: 16pt;
-      font-weight: bold;
-      margin-top: 12pt;
-      margin-bottom: 6pt;
-    }
-    h3 {
-      font-size: 14pt;
-      font-weight: bold;
-      margin-top: 12pt;
-      margin-bottom: 6pt;
-    }
-    p {
-      margin-bottom: 6pt;
-      text-align: justify;
-    }
-    strong {
-      font-weight: bold;
-    }
-    em {
-      font-style: italic;
-    }
-    ul, ol {
-      margin-left: 0.5in;
-      margin-bottom: 6pt;
-    }
-    li {
-      margin-bottom: 3pt;
-      list-style-type: disc;
-    }
-    ul li {
-      list-style-type: disc;
-    }
-    ol li {
-      list-style-type: decimal;
-    }
-    hr {
-      border: none;
-      border-top: 1pt solid #000;
-      margin: 12pt 0;
-    }
-  </style>
-</head>
-<body>
-  ${htmlContent}
-</body>
-</html>`
+    return new Document({
+      sections: [{
+        properties: {},
+        children: paragraphs
+      }]
+    })
   }
 
-  // Helper function to convert markdown to HTML
-  const convertMarkdownToHtml = (markdown: string) => {
-    let html = markdown
-      // Convert headers first
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+  // Helper function to parse markdown content into DOCX paragraphs
+  const parseMarkdownToDocx = (markdown: string) => {
+    const lines = markdown.split('\n')
+    const paragraphs: Paragraph[] = []
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
       
-      // Convert bold and italic text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Skip empty lines
+      if (line === '') {
+        paragraphs.push(new Paragraph({ children: [new TextRun({ text: "" })] }))
+        continue
+      }
       
-      // Convert horizontal rules
-      .replace(/^---$/gim, '<hr>')
+      // Handle headers
+      if (line.startsWith('# ')) {
+        paragraphs.push(new Paragraph({
+          text: line.substring(2),
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 200, before: 200 }
+        }))
+      } else if (line.startsWith('## ')) {
+        paragraphs.push(new Paragraph({
+          text: line.substring(3),
+          heading: HeadingLevel.HEADING_2,
+          spacing: { after: 200, before: 200 }
+        }))
+      } else if (line.startsWith('### ')) {
+        paragraphs.push(new Paragraph({
+          text: line.substring(4),
+          heading: HeadingLevel.HEADING_3,
+          spacing: { after: 200, before: 200 }
+        }))
+      }
+      // Handle horizontal rules
+      else if (line === '---') {
+        paragraphs.push(new Paragraph({
+          children: [new TextRun({ text: "─".repeat(50) })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200, before: 200 }
+        }))
+      }
+      // Handle list items
+      else if (line.startsWith('- ')) {
+        paragraphs.push(new Paragraph({
+          text: `• ${line.substring(2)}`,
+          spacing: { after: 100, before: 100 },
+          indent: { left: 720 } // 0.5 inch
+        }))
+      } else if (/^\d+\. /.test(line)) {
+        const match = line.match(/^(\d+)\. (.*)/)
+        if (match) {
+          paragraphs.push(new Paragraph({
+            text: `${match[1]}. ${match[2]}`,
+            spacing: { after: 100, before: 100 },
+            indent: { left: 720 } // 0.5 inch
+          }))
+        }
+      }
+      // Handle regular paragraphs with formatting
+      else {
+        const textRuns = parseInlineFormatting(line)
+        paragraphs.push(new Paragraph({
+          children: textRuns,
+          spacing: { after: 100, before: 100 },
+          alignment: AlignmentType.JUSTIFIED
+        }))
+      }
+    }
+    
+    return paragraphs
+  }
+
+  // Helper function to parse inline formatting (bold, italic)
+  const parseInlineFormatting = (text: string) => {
+    const textRuns: TextRun[] = []
+    let currentText = text
+    let position = 0
+    
+    // Handle bold text (**text**)
+    while (currentText.includes('**')) {
+      const boldStart = currentText.indexOf('**')
+      const boldEnd = currentText.indexOf('**', boldStart + 2)
       
-      // Convert lists - handle both bullet and numbered lists
-      .replace(/^(\s*)- (.*$)/gim, '<li>$2</li>')
-      .replace(/^(\s*)\d+\. (.*$)/gim, '<li>$2</li>')
+      if (boldEnd === -1) break
       
-      // Split into lines and process each line
-      .split('\n')
-      .map(line => {
-        // Skip empty lines
-        if (line.trim() === '') return ''
-        
-        // If it's already a header, list item, or hr, return as is
-        if (line.match(/^<(h[1-6]|li|hr)/)) return line
-        
-        // If it's a list item, wrap in ul
-        if (line.match(/^<li>/)) return `<ul>${line}</ul>`
-        
-        // Otherwise, wrap in paragraph
-        return `<p>${line}</p>`
-      })
-      .join('\n')
+      // Add text before bold
+      if (boldStart > 0) {
+        textRuns.push(new TextRun({ text: currentText.substring(0, boldStart) }))
+      }
       
-      // Clean up multiple ul tags
-      .replace(/<\/ul>\s*<ul>/g, '')
+      // Add bold text
+      const boldText = currentText.substring(boldStart + 2, boldEnd)
+      textRuns.push(new TextRun({ text: boldText, bold: true }))
       
-      // Clean up multiple paragraph tags
-      .replace(/<\/p>\s*<p>/g, '<br>')
+      // Update current text
+      currentText = currentText.substring(boldEnd + 2)
+    }
+    
+    // Handle italic text (*text*)
+    while (currentText.includes('*') && !currentText.includes('**')) {
+      const italicStart = currentText.indexOf('*')
+      const italicEnd = currentText.indexOf('*', italicStart + 1)
       
-      // Clean up empty paragraphs
-      .replace(/<p>\s*<\/p>/g, '')
+      if (italicEnd === -1) break
       
-      // Clean up extra whitespace
-      .replace(/\n\s*\n/g, '\n')
+      // Add text before italic
+      if (italicStart > 0) {
+        textRuns.push(new TextRun({ text: currentText.substring(0, italicStart) }))
+      }
       
-    return html
+      // Add italic text
+      const italicText = currentText.substring(italicStart + 1, italicEnd)
+      textRuns.push(new TextRun({ text: italicText, italics: true }))
+      
+      // Update current text
+      currentText = currentText.substring(italicEnd + 1)
+    }
+    
+    // Add remaining text
+    if (currentText) {
+      textRuns.push(new TextRun({ text: currentText }))
+    }
+    
+    return textRuns.length > 0 ? textRuns : [new TextRun({ text: text })]
   }
 
   return (

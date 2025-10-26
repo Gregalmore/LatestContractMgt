@@ -46,12 +46,6 @@ export async function triggerReviewWorkflow(data: N8nReviewRequest) {
   const formData = new FormData()
   formData.append('file', data.file)
   
-  console.log('Sending file to n8n webhook:', url)
-  console.log('File details:', {
-    name: data.file.name,
-    size: data.file.size,
-    type: data.file.type
-  })
   
   const response = await axios.post(url, formData, {
     timeout: 180000, // 3 minute timeout
@@ -60,7 +54,6 @@ export async function triggerReviewWorkflow(data: N8nReviewRequest) {
     }
   })
   
-  console.log('n8n webhook response:', response.status, response.data)
   return response.data
 }
 

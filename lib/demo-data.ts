@@ -23,7 +23,7 @@ export interface DueDiligenceResult {
   medium_priority_issues: number;
   top_concerns: Array<{
     title: string;
-    severity: 'critical' | 'high' | 'medium';
+    severity: 'critical' | 'high' | 'medium' | 'low';
     description: string;
     recommendation: string;
     context: string;

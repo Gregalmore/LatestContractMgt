@@ -50,42 +50,25 @@ export default function ReviewContractTab() {
         file: file // Send File object directly
       }
 
-      console.log('Sending file to n8n webhook:', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      })
 
       const analysisResult = await triggerReviewWorkflow(requestData)
-      console.log('Analysis result received:', analysisResult)
 
       // Convert n8n response to our expected format
       let mappedResult: DueDiligenceResult
       
       if (analysisResult && typeof analysisResult === 'object') {
-        // Count issues by severity
-        const topConcerns = analysisResult.top_concerns || []
-        const criticalCount = topConcerns.filter(c => c.severity?.toLowerCase() === 'critical').length
-        const highCount = topConcerns.filter(c => c.severity?.toLowerCase() === 'high').length
-        const mediumCount = topConcerns.filter(c => c.severity?.toLowerCase() === 'medium').length
+        // Handle the actual n8n response structure: { output: { ... } }
+        const responseData = analysisResult.output || analysisResult
         
-        // Determine overall risk based on highest severity
-        let overallRisk = 'LOW'
-        if (criticalCount > 0) overallRisk = 'CRITICAL'
-        else if (highCount > 0) overallRisk = 'HIGH'
-        else if (mediumCount > 0) overallRisk = 'MEDIUM'
-        
-        // Map n8n response to our UI format
+        // Use the data directly from the API response
         mappedResult = {
-          overall_risk: overallRisk,
-          critical_issues: criticalCount,
-          high_priority_issues: highCount,
-          medium_priority_issues: mediumCount,
-          top_concerns: topConcerns,
-          checklist_results: analysisResult.checklist_results || []
+          overall_risk: responseData.overall_risk || 'LOW',
+          critical_issues: responseData.critical_issues || 0,
+          high_priority_issues: responseData.high_priority_issues || 0,
+          medium_priority_issues: responseData.medium_priority_issues || 0,
+          top_concerns: responseData.top_concerns || [],
+          checklist_results: responseData.checklist_results || []
         }
-        
-        console.log('Mapped result:', mappedResult)
       } else {
         // Fallback to demo data if response is not in expected format
         mappedResult = DUE_DILIGENCE_RESULTS.good_contract
@@ -93,7 +76,6 @@ export default function ReviewContractTab() {
 
       setResult(mappedResult)
     } catch (err: any) {
-      console.error('Error analyzing contract:', err)
       setError(err.message || 'Failed to analyze contract')
     } finally {
       setIsAnalyzing(false)
@@ -205,6 +187,7 @@ export default function ReviewContractTab() {
       {/* Results */}
       {result && (
         <div className="space-y-6">
+
           {/* Risk Assessment Summary */}
           <Card>
             <CardHeader>
