@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -19,11 +19,17 @@ export default function ReviewContractTab() {
   const [analysisStage, setAnalysisStage] = useState("")
   const [result, setResult] = useState<DueDiligenceResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [activeFilter, setActiveFilter] = useState<string | null>(null)
+  
+  // Refs for scrolling to specific concerns
+  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const concernsSectionRef = useRef<HTMLDivElement | null>(null)
 
   const handleFileUpload = async (file: File) => {
     setIsAnalyzing(true)
     setError(null)
     setResult(null)
+    setActiveFilter(null)
 
     try {
       // Validate file type
@@ -47,9 +53,8 @@ export default function ReviewContractTab() {
       // Send to n8n webhook as multipart
       setAnalysisStage("Sending file to AI analysis...")
       const requestData: N8nReviewRequest = {
-        file: file // Send File object directly
+        file: file
       }
-
 
       const analysisResult = await triggerReviewWorkflow(requestData)
 
@@ -57,10 +62,8 @@ export default function ReviewContractTab() {
       let mappedResult: DueDiligenceResult
       
       if (analysisResult && typeof analysisResult === 'object') {
-        // Handle the actual n8n response structure: { output: { ... } }
         const responseData = analysisResult.output || analysisResult
         
-        // Use the data directly from the API response
         mappedResult = {
           overall_risk: responseData.overall_risk || 'LOW',
           critical_issues: responseData.critical_issues || 0,
@@ -70,7 +73,6 @@ export default function ReviewContractTab() {
           checklist_results: responseData.checklist_results || []
         }
       } else {
-        // Fallback to demo data if response is not in expected format
         mappedResult = DUE_DILIGENCE_RESULTS.good_contract
       }
 
@@ -83,6 +85,34 @@ export default function ReviewContractTab() {
     }
   }
 
+  // Click handler for risk tiles - scrolls to first matching concern
+  const handleRiskClick = (severity: string) => {
+    if (!result?.top_concerns) return
+    
+    const severityLower = severity.toLowerCase()
+    setActiveFilter(severityLower)
+    
+    // Find first concern with matching severity
+    const idx = result.top_concerns.findIndex(
+      c => c.severity?.toLowerCase() === severityLower
+    )
+    
+    if (idx >= 0) {
+      // Scroll to the concerns section first
+      concernsSectionRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      })
+      
+      // Then scroll to the specific card after a brief delay
+      setTimeout(() => {
+        cardRefs.current[idx]?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        })
+      }, 300)
+    }
+  }
 
   const getRiskColor = (risk: string) => {
     switch (risk?.toUpperCase()) {
@@ -104,6 +134,11 @@ export default function ReviewContractTab() {
     }
   }
 
+  // Filter concerns if a severity is selected
+  const displayedConcerns = activeFilter && result?.top_concerns
+    ? result.top_concerns.filter(c => c.severity?.toLowerCase() === activeFilter)
+    : result?.top_concerns || []
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -113,7 +148,6 @@ export default function ReviewContractTab() {
           Automated analysis using Eric Sacks' due diligence checklist
         </p>
       </div>
-
 
       {/* File Upload */}
       <Card>
@@ -163,14 +197,6 @@ export default function ReviewContractTab() {
                 <span className="text-sm font-medium">{analysisStage}</span>
               </div>
               <Progress value={75} className="w-full" />
-              <p className="text-xs text-muted-foreground">
-                Uploading file directly to n8n webhook...
-              </p>
-              <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                <strong>Webhook URL:</strong> https://n8n.srv1073744.hstgr.cloud/webhook/contract-analysis<br/>
-                <strong>Content-Type:</strong> multipart/form-data<br/>
-                <strong>Field:</strong> file
-          </div>
             </div>
           </CardContent>
         </Card>
@@ -187,14 +213,16 @@ export default function ReviewContractTab() {
       {/* Results */}
       {result && (
         <div className="space-y-6">
-
-          {/* Risk Assessment Summary */}
+          {/* Risk Assessment Summary - Now Clickable */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
                 Risk Assessment
               </CardTitle>
+              <CardDescription>
+                Click on any metric to view related issues
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -204,76 +232,132 @@ export default function ReviewContractTab() {
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Overall Risk</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600 p-3 rounded-lg bg-red-50">
+                
+                {/* Clickable Critical Tile */}
+                <button 
+                  onClick={() => handleRiskClick('critical')}
+                  disabled={!result.critical_issues}
+                  className="text-center hover:opacity-80 transition-opacity disabled:cursor-not-allowed"
+                >
+                  <div className={`text-2xl font-bold p-3 rounded-lg ${
+                    activeFilter === 'critical' ? 'ring-2 ring-red-400' : ''
+                  } bg-red-50 text-red-600`}>
                     {result.critical_issues || 0}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Critical Issues</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600 p-3 rounded-lg bg-orange-50">
+                </button>
+                
+                {/* Clickable High Priority Tile */}
+                <button 
+                  onClick={() => handleRiskClick('high')}
+                  disabled={!result.high_priority_issues}
+                  className="text-center hover:opacity-80 transition-opacity disabled:cursor-not-allowed"
+                >
+                  <div className={`text-2xl font-bold p-3 rounded-lg ${
+                    activeFilter === 'high' ? 'ring-2 ring-orange-400' : ''
+                  } bg-orange-50 text-orange-600`}>
                     {result.high_priority_issues || 0}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">High Priority</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600 p-3 rounded-lg bg-yellow-50">
+                </button>
+                
+                {/* Clickable Medium Priority Tile */}
+                <button 
+                  onClick={() => handleRiskClick('medium')}
+                  disabled={!result.medium_priority_issues}
+                  className="text-center hover:opacity-80 transition-opacity disabled:cursor-not-allowed"
+                >
+                  <div className={`text-2xl font-bold p-3 rounded-lg ${
+                    activeFilter === 'medium' ? 'ring-2 ring-yellow-400' : ''
+                  } bg-yellow-50 text-yellow-600`}>
                     {result.medium_priority_issues || 0}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Medium Priority</p>
-                </div>
+                </button>
               </div>
+              
+              {/* Clear Filter Button */}
+              {activeFilter && (
+                <div className="mt-4 text-center">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveFilter(null)}
+                  >
+                    Clear Filter (Showing {activeFilter.toUpperCase()} issues)
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Top Concerns */}
-          {result.top_concerns && result.top_concerns.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Concerns</CardTitle>
-                <CardDescription>
-                  Issues identified in the contract analysis
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {result.top_concerns.map((concern, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        {getSeverityIcon(concern.severity)}
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-foreground">{concern.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">{concern.description}</p>
-                          <div className="mt-2">
-                            <Badge variant={concern.severity === 'critical' ? 'destructive' : 'secondary'}>
-                              {concern.severity?.toUpperCase() || 'UNKNOWN'}
-                            </Badge>
-                          </div>
-                          <div className="mt-3 p-3 bg-muted rounded-md">
-                            <p className="text-sm font-medium text-foreground mb-1">Recommendation:</p>
-                            <p className="text-sm text-muted-foreground">{concern.recommendation}</p>
-                          </div>
-                          <div className="mt-2 p-2 bg-muted/50 rounded text-xs">
-                            <span className="font-medium">Context:</span> {concern.context}
+          {/* Top Concerns - With Scroll Anchors */}
+          <div ref={concernsSectionRef}>
+            {displayedConcerns.length > 0 ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {activeFilter ? `${activeFilter.toUpperCase()} Priority Issues` : 'Top Concerns'}
+                  </CardTitle>
+                  <CardDescription>
+                    {activeFilter 
+                      ? `Showing ${displayedConcerns.length} ${activeFilter} severity issue(s)`
+                      : 'Issues identified in the contract analysis'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {displayedConcerns.map((concern, index) => {
+                      const actualIndex = concern.index ?? index
+                      return (
+                        <div 
+                          key={actualIndex}
+                          ref={el => { cardRefs.current[actualIndex] = el }}
+                          id={concern.anchor || `finding-${actualIndex}`}
+                          className={`border rounded-lg p-4 transition-all ${
+                            activeFilter === concern.severity?.toLowerCase()
+                              ? 'ring-2 ring-blue-400 bg-blue-50/30'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {getSeverityIcon(concern.severity)}
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-foreground">{concern.title}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">{concern.description}</p>
+                              <div className="mt-2">
+                                <Badge variant={concern.severity === 'critical' ? 'destructive' : 'secondary'}>
+                                  {concern.severity?.toUpperCase() || 'UNKNOWN'}
+                                </Badge>
+                              </div>
+                              <div className="mt-3 p-3 bg-muted rounded-md">
+                                <p className="text-sm font-medium text-foreground mb-1">Recommendation:</p>
+                                <p className="text-sm text-muted-foreground">{concern.recommendation}</p>
+                              </div>
+                              <div className="mt-2 p-2 bg-muted/50 rounded text-xs">
+                                <span className="font-medium">Context:</span> {concern.context}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center text-muted-foreground">
-                  <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                  <p className="font-medium">No concerns identified</p>
-                  <p className="text-sm">The contract appears to be well-structured with no major issues detected.</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : result.top_concerns?.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                    <p className="font-medium">No concerns identified</p>
+                    <p className="text-sm">The contract appears to be well-structured with no major issues detected.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+          </div>
 
           {/* Checklist Results */}
           {result.checklist_results && result.checklist_results.length > 0 ? (
@@ -321,7 +405,6 @@ export default function ReviewContractTab() {
               </CardContent>
             </Card>
           )}
-
         </div>
       )}
     </div>
