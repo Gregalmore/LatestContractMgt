@@ -23,17 +23,21 @@ export const ProducerAgreementTemplate: React.FC<ProducerAgreementTemplateProps>
     governingLaw,
     compositionTitle,
     projectDescription,
+    recordCompany,
+    coProducer,
+    numberOfMasters,
+    producerCompany,
   } = variables;
 
   const templateContent = `# PRODUCER AGREEMENT
 
-AGREEMENT made and entered into as of this __ day of ___, 20__, by and between ${company || '_____________'} (referred to herein as "we" or "us")[, c/o ${companyAddress || '_______'}, Attention: ${companyContact || ''}], and ${producer || '________________'} ("you), [c/o ${producerAddress || '______________'}, Attention: ${producerContact || ''}]. [DRAFTING NOTE: add following language if agreement is direct with producer, i.e. no loan-out: "All references to "you", "Producer", "you and Producer", "you or Producer", and the like shall be deemed to refer solely to you.]
+AGREEMENT made and entered into as of ${date}, by and between ${company || 'To be provided'} (referred to herein as "we" or "us")[, c/o ${companyAddress || 'To be provided'}, Attention: ${companyContact || 'To be provided'}], and ${producer || 'To be provided'} ("you), [c/o ${producerAddress || 'To be provided'}, Attention: ${producerContact || 'To be provided'}].
 
 The parties hereby agree as follows:
 
 ## 1. Employment and Term.
 
-**(a)** We hereby engage you to furnish the services of ${producer || '_____________'} ([individually and collectively] referred to herein as "Producer") to produce[, in conjunction with _______________,] [_] master recording[s] of the musical composition[s] tentatively entitled "${compositionTitle || '_____________'}" ([each a] [the] "Master" [and collectively the "Masters"]) [DRAFTING NOTE: Include following language if number of masters is not set: and such other master recordings as we may request (in our sole discretion) of those musical compositions approved by us] embodying the performances of ${artist || '_______________'} ("Artist") intended initially for (among other exploitations) possible inclusion on Artist's forthcoming album (the "New LP")${projectDescription ? ` ${projectDescription}` : ''} to be delivered by us to ${'_______________'} ("Record Company"), for the manufacture and distribution of phonograph records and other uses of the Masters. You accept such engagement and agree to cause Producer to render such production services for us during the term hereof upon the terms and conditions hereinafter set forth. For the avoidance of doubt, nothing contained in this Agreement shall obligate us (and/or our designees, including without limitation, Record Company) to use and/or exploit the Masters in any manner whatsoever. Notwithstanding anything to the contrary contained in this Agreement, the term "New LP" shall solely be deemed to refer to those versions of the New LP (if any) that embody a Master produced hereunder. [DRAFTING NOTE: add following language if agreement is for ONE Master only: For the avoidance of doubt, any reference to "Masters", "each Master", "any Master" and the like shall refer solely to the Master.]
+**(a)** We hereby engage you to furnish the services of ${producer || 'To be provided'} ([individually and collectively] referred to herein as "Producer") to produce${coProducer ? `, in conjunction with ${coProducer},` : ''} ${numberOfMasters || ''} master recording(s) of the musical composition(s) tentatively entitled "${compositionTitle || 'To be provided'}" (each, a "Master" and collectively, the "Masters") embodying the performances of ${artist || 'To be provided'} ("Artist") intended initially for (among other exploitations) possible inclusion on Artist's forthcoming album (the "New LP")${projectDescription ? ` ${projectDescription}` : ''} to be delivered by us to ${recordCompany || 'To be provided'} ("Record Company"), for the manufacture and distribution of phonograph records and other uses of the Masters. You accept such engagement and agree to cause Producer to render such production services for us during the term hereof upon the terms and conditions hereinafter set forth. For the avoidance of doubt, nothing contained in this Agreement shall obligate us (and/or our designees, including without limitation, Record Company) to use and/or exploit the Masters in any manner whatsoever. Notwithstanding anything to the contrary contained in this Agreement, the term "New LP" shall solely be deemed to refer to those versions of the New LP (if any) that embody a Master produced hereunder.
 
 **(b)** The term of this Agreement shall commence upon the date hereof and shall continue until you and Producer have fulfilled all of your obligations hereunder (the "Term"). You shall cause Producer to perform at all times diligently, competently, and to the best of Producer's abilities the services required to be performed by Producer hereunder. During the Term, you shall furnish Producer's services to us on a first-priority basis, and Producer shall work continuously and diligently to fully and satisfactorily render and complete all of Producer's services and obligations hereunder.
 
@@ -121,7 +125,7 @@ In consideration of the rights granted to us (and our designees) and all service
 **(a)** Except as expressly otherwise provided in this Agreement (including without limitation, the provisions of this paragraph 5) and subject to the terms and conditions hereof, all royalties payable to you hereunder shall be reduced, adjusted, determined, calculated and paid (but not escalated) in the same manner (e.g., reductions and adjustments to royalty rates, calculation of the applicable Royalty Base Price [DRAFTING NOTE: or such other term pursuant to which the royalty is calculated under the Recording Agreement and modify this agreement to the extent applicable], container charges, free goods, suggested retail list price, reserves, compact disc, DAT and other format-based adjustments, etc.) and subject to the same terms and conditions as royalties (if any) for the same are payable to us by Record Company pursuant to our exclusive recording agreement, as heretofore amended, with Record Company (the "Recording Agreement").
 
 **(b)** 
-(i) With respect to top-line, full-priced net sales through normal retail channels in the United States ("USNRC Net Sales") of albums solely embodying the Masters recorded hereunder, a royalty calculated at a basic royalty rate of ___ percent (__%) (the "Producer Base Rate").
+(i) With respect to top-line, full-priced net sales through normal retail channels in the United States ("USNRC Net Sales") of albums solely embodying the Masters recorded hereunder, a royalty calculated at a basic royalty rate of ${royaltyRate || '___'} Percent (${royaltyRate || '__'}%) (the "Producer Base Rate").
 
 [To add royalty escalations, if applicable:
 
@@ -156,9 +160,9 @@ Notwithstanding the foregoing, following your satisfactory delivery of the Maste
 
 **(a)** We shall instruct and use reasonable efforts to cause Record Company (pursuant to the Letter of Direction) to pay to you, on our behalf, the royalties becoming payable to you hereunder. All such royalties shall be paid at the same times as Record Company renders statements and payments to us. In the event that Record Company fails or refuses to so account directly to you, then we shall account for and pay all royalties shown to be due to you within sixty (60) days after we receive applicable accountings from the Record Company. We shall have the absolute right to rely on accounting statements received by us from the Record Company and we shall not be responsible for any error, omission or other inaccuracy in any such statement.
 
-**(b)** All royalty statements and all other accounts rendered by us to you shall be binding upon you and not subject to any objection by you for any reason unless specific objection in writing, stating the basis thereof, is given to us within ______ (__) months from the date rendered. [DRAFTING NOTE: check Recording Agreement and insert periods that are at least six (6) months less than what is accorded to us, as applicable.] You shall be foreclosed from maintaining any action, claim or proceeding against us or Artist (or Record Company, as applicable) in any forum or tribunal with respect to any statement or accounting due hereunder unless such action, claim or proceeding is commenced against us or Artist in a court of competent jurisdiction within _____ (__) months after the date such statement or accounting is rendered.
+**(b)** All royalty statements and all other accounts rendered by us to you shall be binding upon you and not subject to any objection by you for any reason unless specific objection in writing, stating the basis thereof, is given to us within ${variables.objectionPeriodMonths || '6'} months from the date rendered. You shall be foreclosed from maintaining any action, claim or proceeding against us or Artist (or Record Company, as applicable) in any forum or tribunal with respect to any statement or accounting due hereunder unless such action, claim or proceeding is commenced against us or Artist in a court of competent jurisdiction within ${variables.lawsuitPeriodMonths || '12'} months after the date such statement or accounting is rendered.
 
-**(c)** You shall have the right to appoint a certified public accountant who is not then currently engaged in an outstanding audit of us or Artist, to examine our books and records relating to the sale of records embodying the Masters hereunder (but excluding any books or records relating to the manufacture of records); provided, that such examination shall take place at our offices during normal business hours, on reasonable written notice, not more frequently than once in any calendar year and at your sole cost and expense. Such examination may be conducted only once with respect to a particular statement and only within ______ (__) months after the date such statement is sent to you. You shall cause your accountant to deliver a copy of his audit report to us and/or Artist within thirty (30) days after the completion of said accountant's examination of our books and records. For the avoidance of doubt, you shall not have the right to examine Record Company's books and records. The rights granted herein to you constitute your and Producer's sole right to examine our books and records.
+**(c)** You shall have the right to appoint a certified public accountant who is not then currently engaged in an outstanding audit of us or Artist, to examine our books and records relating to the sale of records embodying the Masters hereunder (but excluding any books or records relating to the manufacture of records); provided, that such examination shall take place at our offices during normal business hours, on reasonable written notice, not more frequently than once in any calendar year and at your sole cost and expense. Such examination may be conducted only once with respect to a particular statement and only within ${variables.auditWindowMonths || '24'} months after the date such statement is sent to you. You shall cause your accountant to deliver a copy of his audit report to us and/or Artist within thirty (30) days after the completion of said accountant's examination of our books and records. For the avoidance of doubt, you shall not have the right to examine Record Company's books and records. The rights granted herein to you constitute your and Producer's sole right to examine our books and records.
 
 [To add a tolling provision, if applicable:
 
@@ -180,7 +184,7 @@ Notwithstanding anything to the contrary contained herein, the preceding provisi
 
 ## 7. Advance.
 
-**(a)** Conditioned upon your and Producer's full and satisfactory performance of all of the terms and conditions hereof and in consideration for all rights granted to us (and our designees) and services rendered by you and Producer (including without limitation, your and/or Producer's services as a producer, mixer and/or performer) in connection with the Masters, we shall pay to you (or shall cause to be paid to you on our behalf) a recoupable advance for each Master produced and delivered hereunder in the amount of ______________ Dollars ($_____) (the "Advance"). The Advance for each Master shall be payable as follows: fifty percent (50%) promptly following commencement of recording the applicable Master, and the balance promptly following delivery of such Master in a form technically and commercially satisfactory to us and Record Company, but in either event not prior to the complete execution of this Agreement.
+**(a)** Conditioned upon your and Producer's full and satisfactory performance of all of the terms and conditions hereof and in consideration for all rights granted to us (and our designees) and services rendered by you and Producer (including without limitation, your and/or Producer's services as a producer, mixer and/or performer) in connection with the Masters, we shall pay to you (or shall cause to be paid to you on our behalf) a recoupable advance for each Master produced and delivered hereunder in the amount of ${advance || '__________'} (the "Advance"). The Advance for each Master shall be payable as follows: fifty percent (50%) promptly following commencement of recording the applicable Master, and the balance promptly following delivery of such Master in a form technically and commercially satisfactory to us and Record Company, but in either event not prior to the complete execution of this Agreement.
 
 [To add payment of portion of advance to Producer Personnel or Producer's attorney, if applicable:
 You hereby irrevocably direct and authorize us to remit __________ Dollars ($__________) of the Advance payable to you in respect of the Master to the order of __________, located at __________. Our compliance with such authorization shall constitute an accommodation to you, and nothing contained herein shall constitute __________ a beneficiary or party to this Agreement. The foregoing payment will constitute payment to you, and accordingly, we will have no liability by reason of any erroneous payment or failure to comply with this authorization, and you will indemnify and hold us and Record Company harmless against any claims asserted against us or Record Company and any damages, losses or expenses incurred by reason of any such payment.]
@@ -302,7 +306,7 @@ Neither we nor Record Company shall be deemed in default hereunder if performanc
 
 We shall instruct and use reasonable efforts to cause Record Company to accord Producer an appropriate producer credit on the packaging and liner notes of the New LP and on liner notes of other records derived from the Masters produced hereunder [(in all configurations, to the extent such configurations provide such credits and including wherever digital meta-data permits)] in substantially the following form:
 
-"Produced by ________________".
+"Produced by ${producer || '______________'}".
 
 [To add credit in trade or consumer ads, if applicable:
 We shall also instruct and use reasonable efforts to cause Record Company to accord Producer such credit in all one-half (1/2) page or larger trade advertisements (and, to the extent permitted by Record Company's standard policies, all one-half (1/2) page or larger advertisements for consumer publications and so-called Billboard "strip" ads), which relate to singles embodying the Master hereunder on the A-side, in the United States placed by or under Record Company's control.]
@@ -319,10 +323,9 @@ You acknowledge that your and Producer's services hereunder, as well as the Mast
 
 ## 18. Notices.
 
-The respective addresses of us and you for all purposes of this Agreement shall be as set forth above until notice of a new address shall be duly given. Any notice desired or required to be given by either party to the other shall be in writing and shall be delivered by hand (to an officer if the addressee is a corporation), or sent by United States certified mail, postage prepaid, return receipt requested or sent by a nationally-known overnight courier (e.g., Federal Express, UPS, Express Mail, DHL) with all charges prepaid, provided that any royalty statement may be sent by regular mail. Properly addressed notices delivered or sent as provided herein shall be deemed given when delivered by hand, or one (1) business day after the same is postmarked if delivered by mail or overnight courier. Copies of all notices to us shall be sent to Grubman Shire & Meiselas, P.C., 152 West 57th Street, New York, New York 10019, Attention: ___________, Esq.
+The respective addresses of us and you for all purposes of this Agreement shall be as set forth above until notice of a new address shall be duly given. Any notice desired or required to be given by either party to the other shall be in writing and shall be delivered by hand (to an officer if the addressee is a corporation), or sent by United States certified mail, postage prepaid, return receipt requested or sent by a nationally-known overnight courier (e.g., Federal Express, UPS, Express Mail, DHL) with all charges prepaid, provided that any royalty statement may be sent by regular mail. Properly addressed notices delivered or sent as provided herein shall be deemed given when delivered by hand, or one (1) business day after the same is postmarked if delivered by mail or overnight courier. Copies of all notices to us shall be sent to Grubman Shire & Meiselas, P.C., 152 West 57th Street, New York, New York 10019, Attention: ${variables.ourCounselAttention || 'General Counsel'}, Esq.
 
-[To add that notices be sent to opposing counsel, if applicable:
-Copies of all notices to you shall be sent to __________, c/o __________ , Attention: __________, Esq.; provided, however, that the inadvertent failure to send any such copy shall not be deemed to be a breach of this Agreement nor shall it impair the validity and effectiveness of any such notice.]
+Copies of all notices to you may be sent to ${variables.yourCounselFirm || ''}, c/o ${variables.yourCounselCO || ''} , Attention: ${variables.yourCounselAttention || ''}, Esq.; provided, however, that the inadvertent failure to send any such copy shall not be deemed to be a breach of this Agreement nor shall it impair the validity and effectiveness of any such notice.
 
 ## 19. Definitions.
 
@@ -366,19 +369,19 @@ The parties hereto have executed this Agreement on the day and year first above 
 
 ________________________
 
-By: ____________________________
-An Authorized Signatory
+By: ${variables.signature1Name || '________________'}
+${variables.signature1Title || 'An Authorized Signatory'}
 
 _____________________________
 
-By: ____________________________
-An Authorized Signatory
+By: ${variables.signature2Name || '________________'}
+${variables.signature2Title || 'An Authorized Signatory'}
 
-Fed. Tax ID No.: _____________
+Fed. Tax ID No.: ${variables.federalTaxId || ''}
 
 ---
 
-In order to induce _______________ ("Lender") to enter into the foregoing agreement (the "Agreement") with _______________ ("Productions"), [each of] the undersigned hereby [respectively]:
+In order to induce ${variables.inducementLenderName || 'Lender'} ("Lender") to enter into the foregoing agreement (the "Agreement") with ${variables.inducementProductionsName || 'Productions'} ("Productions"), [each of] the undersigned hereby [respectively]:
 
 (a) acknowledges that the undersigned has read and is familiar with all the terms and conditions of the Agreement;
 
@@ -387,9 +390,9 @@ In order to induce _______________ ("Lender") to enter into the foregoing agreem
 (c) acknowledges and agrees that neither Lender nor Record Company shall be under any obligation to make any payments to any of the undersigned or otherwise, for or in connection with this inducement and for or in connection with the services rendered by the undersigned or in connection with the rights granted to Lender or Record Company thereunder and the fulfillment of the undersigned's obligations pursuant to the Agreement.
 
 [ __________________________________
-__________
+${variables.inducementSignerLine2 || '__________'}
 
-Collectively p/k/a ___________ ]
+Collectively p/k/a ${variables.collectivePkaName || '___________'} ]
 
 ---
 
@@ -397,31 +400,31 @@ Collectively p/k/a ___________ ]
 
 **Letter of Direction**
 
-__________________
-c/o _________________________
-____________________________
+${variables.lodAddresseeName || 'Addressee'}
+c/o ${variables.lodAddresseeCo || ''}
+${variables.lodAddresseeAddress || ''}
 
-Dated as of _____, 20__
+Dated as of ${date}
 
-_________________ ("you")
-____________________
-____________________
+${variables.lodYouName || 'You'} ("you")
+${variables.lodYouAddress1 || ''}
+${variables.lodYouAddress2 || ''}
 
-Re: ____________ -w- __________ / Producer Agreement
+Re: ${variables.reLineLeft || ''} -w- ${variables.reLineRight || ''} / Producer Agreement
 
 Gentlepersons:
 
-1. Pursuant to that certain agreement (the "Producer Agreement") by and between _____________ ("Productions") and us, we have engaged Productions to furnish the services of ____________ ([individually and collectively,] "Producer") to produce [, in conjunction with _____________,] [_] master recording[s] of the musical composition[s] tentatively entitled "_____________" ([each a] [the] "Master" [and collectively the "Masters"]) [DRAFTING NOTE: Include following language if number of masters is not set: and such other master recordings as we may request (in our sole discretion) of those musical compositions approved by us] embodying the performances of ________________ ("Artist") for possible inclusion, among other things, on Artist's forthcoming album (the "New LP") which is delivered by us [DRAFTING NOTE: substitute 'Artist' for 'us' for Artist direct deals (deals without furnishing entity) or define accordingly and conform throughout] to you pursuant to the exclusive recording artist agreement, as heretofore amended, between you and us (the "Recording Agreement"). Notwithstanding anything to the contrary contained herein, the term "New LP" shall solely be deemed to refer to those versions of the New LP (if any) that embody a Master produced pursuant to the Producer Agreement. [DRAFTING NOTE: add following language if agreement is for ONE Master only: For the avoidance of doubt, any reference to "Masters", "each Master", "any Master" and the like shall refer solely to the Master.]
+1. Pursuant to that certain agreement (the "Producer Agreement") by and between ${variables.lodProductionsName || producerCompany || company || ''} ("Productions") and us, we have engaged Productions to furnish the services of ${producer || ''} ([individually and collectively,] "Producer") to produce${coProducer ? `, in conjunction with ${coProducer},` : ''} [_] master recording[s] of the musical composition[s] tentatively entitled "${compositionTitle || ''}" ([each a] [the] "Master" [and collectively the "Masters"]) [DRAFTING NOTE: Include following language if number of masters is not set: and such other master recordings as we may request (in our sole discretion) of those musical compositions approved by us] embodying the performances of ${artist || ''} ("Artist") for possible inclusion, among other things, on Artist's forthcoming album (the "New LP") which is delivered by us [DRAFTING NOTE: substitute 'Artist' for 'us' for Artist direct deals (deals without furnishing entity) or define accordingly and conform throughout] to you pursuant to the exclusive recording artist agreement, as heretofore amended, between you and us (the "Recording Agreement"). Notwithstanding anything to the contrary contained herein, the term "New LP" shall solely be deemed to refer to those versions of the New LP (if any) that embody a Master produced pursuant to the Producer Agreement. [DRAFTING NOTE: add following language if agreement is for ONE Master only: For the avoidance of doubt, any reference to "Masters", "each Master", "any Master" and the like shall refer solely to the Master.]
 
 2. Although the Recording Agreement requires us to pay for the services of Producer, we hereby request and irrevocably authorize you to make payments to Productions [DRAFTING NOTE: substitute "Producer" if there is no loan-out, and conform throughout] on our behalf, in connection with the services rendered by Producer, as follows:
 
 [DRAFTING NOTE: CONFORM ALL IMPROVEMENTS IN MAIN AGREEMENT TO LOD, TO THE EXTENT APPLICABLE]
 
-(a) An advance equal to _____________ Dollars ($______) (the "Advance") for each Master produced and delivered under the Producer Agreement, payable as follows: fifty percent (50%) promptly following the commencement of recording applicable Master and the balance promptly following the later of delivery to and acceptance by you of such Master in accordance with the Producer Agreement but in either event not prior to the complete execution of the Producer Agreement. The Advance will be recoupable by you from all monies becoming payable to Productions under subparagraph 2(b) below.
+(a) An advance equal to ${advance || '0'} (the "Advance") for each Master produced and delivered under the Producer Agreement, payable as follows: fifty percent (50%) promptly following the commencement of recording applicable Master and the balance promptly following the later of delivery to and acceptance by you of such Master in accordance with the Producer Agreement but in either event not prior to the complete execution of the Producer Agreement. The Advance will be recoupable by you from all monies becoming payable to Productions under subparagraph 2(b) below.
 
 (b) (i) Except as otherwise expressly provided in this letter (including, without limitation, the provisions of this paragraph 2) and subject to the terms and conditions of the Producer Agreement, the royalties payable to Productions hereunder shall be reduced, adjusted, determined, calculated and paid (but not escalated) in the same manner (e.g., reductions and adjustments to royalty rates, calculation of the applicable Royalty Base Price [DRAFTING NOTE: or such other term pursuant to which the royalty is calculated under the Recording Agreement and modify this agreement to the extent applicable], container charges, free goods, suggested retail list price, reserves, compact disc, DAT and other format-based adjustments, etc.) and subject to the same terms and conditions as the royalties for the same are payable to us pursuant to the Recording Agreement.
 
-(ii) (A) With respect to top-line, full-priced net sales through normal retail channels in the United States ("USNRC Net Sales") of albums solely embodying the Masters, a royalty calculated at a basic royalty rate of __ percent (_%) (the "Producer Base Rate").
+(ii) (A) With respect to top-line, full-priced net sales through normal retail channels in the United States ("USNRC Net Sales") of albums solely embodying the Masters, a royalty calculated at a basic royalty rate of ${royaltyRate || '0'} percent (${royaltyRate || '0'}%) (the "Producer Base Rate").
 
 [To add royalty escalations, if applicable:
 
@@ -435,18 +438,18 @@ Gentlepersons:
 
 **COMPOSER/WRITER AGREEMENT**
 
-Dated as of ____ _, 20__
+Dated as of ${date}
 
-_________,
+${variables.composerPartyName || ''},
 on behalf of [himself/herself] and [his/her] music publishing designee(s) (collectively, "you")
-________________________
-________________________
-________________________
-Attention: ________________
+${variables.composerAddress1 || ''}
+${variables.composerAddress2 || ''}
+${variables.composerAddress3 || ''}
+Attention: ${variables.composerAttention || ''}
 
 Gentlepersons:
 
-Reference is made to that certain producer agreement by and between Mary Jane Productions, Inc. ("MJPI") and ___________ furnishing the services of __________ ([individually and collectively] sometimes referred to herein as "Producer") to produce and deliver [, in conjunction with _______________,] [__(_)] master recording[s] of the musical composition[s] tentatively entitled "_____________" ([each a] [the] "Master" [and collectively the "Masters"]) [DRAFTING NOTE: Include following language if number of masters is not set: and such other master recordings as Artist may request (in Artist's sole discretion) of those musical compositions approved by Artist] embodying the performances of ______________ ("Artist") intended initially for (among other exploitations) possible inclusion on Artist's forthcoming album (the "New LP"), to be delivered by Artist to _______________ ("Record Company") pursuant to Artist's exclusive recording agreement, as heretofore amended, with Record Company (the "Recording Agreement"). For good and valuable consideration, the receipt and sufficiency of which is hereby [respectively] acknowledged by you, including without limitation the opportunity for you to render services as a co-writer and/or co-publisher in connection with certain musical compositions embodied on the Masters, you hereby [respectively] agree to the following terms and conditions (this "Agreement") insofar as they affect you as a songwriter and/or music publisher.
+Reference is made to that certain producer agreement by and between Mary Jane Productions, Inc. ("MJPI") and ${producerCompany || ''} furnishing the services of ${producer || ''} ([individually and collectively] sometimes referred to herein as "Producer") to produce and deliver${coProducer ? `, in conjunction with ${coProducer},` : ''} ${numberOfMasters || ''} master recording[s] of the musical composition[s] tentatively entitled "${compositionTitle || ''}" ([each a] [the] "Master" [and collectively the "Masters"]) [DRAFTING NOTE: Include following language if number of masters is not set: and such other master recordings as Artist may request (in Artist's sole discretion) of those musical compositions approved by Artist] embodying the performances of ${artist || ''} ("Artist") intended initially for (among other exploitations) possible inclusion on Artist's forthcoming album (the "New LP"), to be delivered by Artist to ${recordCompany || ''} ("Record Company") pursuant to Artist's exclusive recording agreement, as heretofore amended, with Record Company (the "Recording Agreement"). For good and valuable consideration, the receipt and sufficiency of which is hereby [respectively] acknowledged by you, including without limitation the opportunity for you to render services as a co-writer and/or co-publisher in connection with certain musical compositions embodied on the Masters, you hereby [respectively] agree to the following terms and conditions (this "Agreement") insofar as they affect you as a songwriter and/or music publisher.
 
 1. As used in this Agreement, "Controlled Composition" shall mean, with respect to each musical composition embodied on a Master ("Subject Composition" [DRAFTING NOTE: add the following language if more than one song: and collectively, the "Subject Compositions"]), those portions of each Subject Composition (i) which are written or composed by you, (ii) which are owned or controlled, directly or indirectly, by you (and/or your [respective] designee(s)) or by any person owned, controlled or affiliated with you (and/or your [respective] designee(s)) or (iii) in which you (and/or your [respective] designee(s)) have a direct or indirect income or other interest of any nature or sort. You shall, and shall cause your [respective] licensees, designees and affiliates to, grant licenses to Artist and/or Record Company (and their respective licensees, designees, affiliates, distributors and assigns) for the right to reproduce, use or otherwise exploit the Controlled Compositions in recordings (including any and all versions and/or remixes thereof) featuring Artist or otherwise, in any and all configurations in any and all media throughout the universe, in accordance with, and subject to, all of the terms and conditions as are contained in the Recording Agreement applicable to compositions written by Artist (including, without limitation, any so-called mechanical royalty "caps" or maximum aggregate mechanical royalty rates for a particular configuration of record), the provisions of which are attached hereto as Attachment 1.
 
@@ -491,8 +494,8 @@ If the foregoing correctly reflects your understanding and agreement, please sig
 
 Very truly yours,
 
-___________________________
-___________________
+${variables.composerSignerName || '___________________________'}
+${variables.composerSignerTitle || '___________________'}
 
 ACCEPTED AND AGREED:
 

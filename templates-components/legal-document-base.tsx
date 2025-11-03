@@ -9,6 +9,7 @@ export interface LegalDocumentVariables {
   companyTitle?: string;
   companyEmail: string;
   companyPhone: string;
+  recordCompany?: string;
   
   // Artist/Client fields
   artist: string;
@@ -16,6 +17,7 @@ export interface LegalDocumentVariables {
   artistContact?: string;
   artistEmail?: string;
   artistPhone?: string;
+  professionalArtistName?: string;
   
   // Producer/Manager fields
   producer: string;
@@ -24,6 +26,8 @@ export interface LegalDocumentVariables {
   producerTitle?: string;
   producerEmail?: string;
   producerPhone?: string;
+  producerCompany?: string;
+  coProducer?: string;
   
   // Financial terms
   advance?: string;
@@ -34,10 +38,91 @@ export interface LegalDocumentVariables {
   // Legal terms
   territory?: string;
   governingLaw?: string;
+  distributionAgreementDate?: string;
   
   // Project details
   compositionTitle?: string;
   projectDescription?: string;
+  numberOfMasters?: string;
+  lenderAddress?: string;
+  lenderContact?: string;
+  lenderEmail?: string;
+  lenderPhone?: string;
+
+  // Schedule / Writers & SoundExchange (Form template)
+  writersAndSplits?: string;
+  payeeAddress?: string;
+  payeePhone?: string;
+  payeeEmail?: string;
+  lodTrackName?: string;
+  lodPaymentPercentage?: string;
+  lodEffectiveDate?: string;
+  lodTrackVersion?: string;
+  lodIsrc?: string;
+  lodAlbum?: string;
+  lodLabel?: string;
+  lodReleaseDate?: string;
+  lodOtherArtists?: string;
+  ourCounselAttention?: string;
+  yourCounselFirm?: string;
+  yourCounselCO?: string;
+  yourCounselAttention?: string;
+  federalTaxId?: string;
+  inducementLenderName?: string;
+  inducementProductionsName?: string;
+  reLineLeft?: string;
+  reLineRight?: string;
+  objectionPeriodMonths?: string;
+  lawsuitPeriodMonths?: string;
+  auditWindowMonths?: string;
+
+  // SoundExchange signatures (Form template)
+  performerSignature?: string;
+  performerPrintedName?: string;
+  authorizedSignatory?: string;
+  authorizedSignatoryPrintedName?: string;
+  signatureDate?: string;
+  additionalPerformerSignature?: string;
+  additionalPerformerPrintedName?: string;
+  additionalAuthorizedSignatory?: string;
+  additionalAuthorizedSignatoryPrintedName?: string;
+  additionalSignatureDate?: string;
+  payeeId?: string;
+  lodPaymentPercentage?: string;
+
+  // Signature blocks
+  companySignTitle?: string;
+  companySignName?: string;
+  lenderSignTitle?: string;
+  lenderSignName?: string;
+
+  // Producer Agreement signatures
+  signature1Name?: string;
+  signature1Title?: string;
+  signature2Name?: string;
+  signature2Title?: string;
+
+  // Misc placeholders
+  collectivePkaName?: string;
+  lodProductionsName?: string;
+  composerSignerName?: string;
+  composerSignerTitle?: string;
+  inducementSignerLine2?: string;
+
+  // Exhibit A Letter of Direction (addresses)
+  lodAddresseeName?: string;
+  lodAddresseeCo?: string;
+  lodAddresseeAddress?: string;
+  lodYouName?: string;
+  lodYouAddress1?: string;
+  lodYouAddress2?: string;
+
+  // Exhibit B Composer/Writer header
+  composerPartyName?: string;
+  composerAddress1?: string;
+  composerAddress2?: string;
+  composerAddress3?: string;
+  composerAttention?: string;
 }
 
 export const formatLegalDocument = (content: string, variables: LegalDocumentVariables): string => {
@@ -70,13 +155,13 @@ export const LegalDocumentFooter = (variables?: LegalDocumentVariables) => `
 
 **COMPANY:**
 
-By: ${variables?.companyContact || '_____________________________'}
-Title: ${variables?.companyTitle || '___________________________'}
+By: ${variables?.companyContact || 'To be provided'}
+Title: ${variables?.companyTitle || 'To be provided'}
 
 **PRODUCER/MANAGER:**
 
-By: ${variables?.producerContact || '_____________________________'}
-Title: ${variables?.producerTitle || '___________________________'}
+By: ${variables?.producerContact || 'To be provided'}
+Title: ${variables?.producerTitle || 'To be provided'}
 
 ---
 

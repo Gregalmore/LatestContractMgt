@@ -7,26 +7,26 @@ interface ManagementAgreementTemplateProps {
 
 export const ManagementAgreementTemplate: React.FC<ManagementAgreementTemplateProps> = ({ variables }) => {
   const {
-    artist,
-    producer: manager,
-    company,
-    companyAddress,
-    companyContact,
-    companyTitle,
-    companyEmail,
-    companyPhone,
-    producerAddress: managerAddress,
-    producerContact: managerContact,
-    producerTitle: managerTitle,
-    producerEmail: managerEmail,
-    producerPhone: managerPhone,
-    artistAddress,
-    artistContact,
-    artistEmail,
-    artistPhone,
-    commissionRate,
-    termYears,
-    date
+    artist = 'Artist',
+    producer: manager = 'Manager',
+    company = 'Company',
+    companyAddress = 'To be provided',
+    companyContact = 'To be provided',
+    companyTitle = 'To be provided',
+    companyEmail = 'To be provided',
+    companyPhone = 'To be provided',
+    producerAddress: managerAddress = 'To be provided',
+    producerContact: managerContact = 'To be provided',
+    producerTitle: managerTitle = 'To be provided',
+    producerEmail: managerEmail = 'To be provided',
+    producerPhone: managerPhone = 'To be provided',
+    artistAddress = 'To be provided',
+    artistContact = 'To be provided',
+    artistEmail = 'To be provided',
+    artistPhone = 'To be provided',
+    commissionRate = '0',
+    termYears = '1',
+    date = 'To be dated'
   } = variables;
 
   const templateContent = `# PERSONAL MANAGEMENT AGREEMENT

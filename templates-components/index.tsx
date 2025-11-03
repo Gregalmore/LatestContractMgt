@@ -1,6 +1,7 @@
 export { ProducerAgreementTemplate } from './producer-agreement';
 export { ManagementAgreementTemplate } from './management-agreement';
 export { FormProducerAgreementTemplate } from './form-producer-agreement';
+export { getFieldsForTemplate } from './variables-schema';
 
 export const TEMPLATE_TYPES = {
   PRODUCER_AGREEMENT: 'producer-agreement',
